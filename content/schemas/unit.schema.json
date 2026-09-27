@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "unit.schema.json",
+  "type": "object",
+  "required": ["id", "version", "title", "learning_objectives", "prerequisite_unit_ids", "exercise_id"],
+  "properties": {
+    "id": { "type": "string" },
+    "version": { "type": "integer", "minimum": 1 },
+    "title": { "type": "string" },
+    "learning_objectives": { "type": "array", "items": { "type": "string" } },
+    "prerequisite_unit_ids": { "type": "array", "items": { "type": "string" } },
+    "exercise_id": { "type": "string" }
+  }
+}

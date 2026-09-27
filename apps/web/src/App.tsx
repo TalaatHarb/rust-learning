@@ -1,4 +1,5 @@
 import { NavLink, Route, Routes } from 'react-router-dom'
+import { useAuth } from 'react-oidc-context'
 import { DashboardPage } from './pages/DashboardPage'
 import { ExercisePage } from './pages/ExercisePage'
 import { ExerciseResultPage } from './pages/ExerciseResultPage'
@@ -18,10 +19,23 @@ const navItems = [
 ]
 
 function App() {
+  const auth = useAuth()
+
   return (
     <div className="app-shell">
       <header className="topbar">
         <h1>Rust Learning Platform</h1>
+        <div className="auth-actions">
+          {auth.isAuthenticated ? (
+            <button type="button" onClick={() => void auth.signoutRedirect()}>
+              Logout
+            </button>
+          ) : (
+            <button type="button" onClick={() => void auth.signinRedirect()}>
+              Login
+            </button>
+          )}
+        </div>
       </header>
       <div className="layout">
         <nav className="navigation" aria-label="Primary">

@@ -5,11 +5,11 @@ A monorepo for building a Rust learning web platform with a React PWA frontend, 
 ## Repository structure
 
 - `apps/web` — React + TypeScript + Vite Progressive Web App shell.
-- `apps/api` — Axum API with `/api/v1/health` as the first versioned endpoint.
-- `apps/executor` — Rust executor service scaffold for submission processing.
-- `content` — curriculum and roadmap source files.
-- `infrastructure` — deployment and environment assets.
-- `docs` — architecture and platform documentation.
+- `apps/api` — Axum API with auth, attempts, and progress endpoints.
+- `apps/executor` — Rust executor service for exercise compilation/testing.
+- `content` — curriculum, lesson, exercise, and roadmap source files.
+- `infrastructure` — local Docker Compose stack (Postgres, Keycloak, executor sandbox baseline).
+- `docs` — architecture, workflow, ADR, and MVP checklist documentation.
 
 ## Quick start
 
@@ -17,6 +17,7 @@ A monorepo for building a Rust learning web platform with a React PWA frontend, 
 
 - Rust toolchain (from `rust-toolchain.toml`)
 - Node.js 20+
+- Docker (for local Postgres + Keycloak)
 
 ### Install dependencies
 
@@ -24,22 +25,16 @@ A monorepo for building a Rust learning web platform with a React PWA frontend, 
 npm install
 ```
 
-### Run web app
+### Start local supporting services
 
 ```bash
-npm run web:dev
+npm run services:up
 ```
 
-### Run API
+### Run all local apps
 
 ```bash
-cargo run -p api
-```
-
-### Run executor
-
-```bash
-cargo run -p executor
+npm run dev
 ```
 
 ### Validate
@@ -50,12 +45,12 @@ npm run validate
 
 ## Initial MVP scope implemented
 
-This repository now includes the Phase 0 foundation plus initial Phase 1/3 bootstrapping:
+This repository now includes:
 
-- monorepo structure and shared tooling
-- React PWA shell with core navigation screens
-- Monaco-based reusable code editor component
-- Axum service with versioned health endpoint
-- executor runtime scaffold with tracing
-
-Further phase-by-phase implementation is tracked in project planning and issue backlog.
+- Foundation docs + ADR process + MVP done checklist
+- Keycloak-ready OIDC web login/logout integration
+- Axum JWT-protected endpoints (`/api/v1/me`, attempts, progress)
+- SQLx migrations + PostgreSQL persistence (users/attempts/progress)
+- Ownership learning unit served from content files
+- End-to-end exercise submission flow to executor (`cargo check` + `cargo test`)
+- Executor timeout/output limits and container hardening baseline

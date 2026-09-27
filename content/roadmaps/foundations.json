@@ -1,0 +1,19 @@
+{
+  "id": "roadmap.rust.foundations",
+  "title": "Rust Foundations",
+  "modules": [
+    {
+      "id": "module.foundations.core",
+      "title": "Core Foundations",
+      "unit_ids": [
+        "unit.rust.variables.v1",
+        "unit.rust.functions.v1",
+        "unit.rust.control-flow.v1",
+        "unit.rust.ownership.v1",
+        "unit.rust.borrowing.v1",
+        "unit.rust.references.v1",
+        "unit.rust.slices.v1"
+      ]
+    }
+  ]
+}

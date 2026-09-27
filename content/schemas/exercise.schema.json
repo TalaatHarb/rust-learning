@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "exercise.schema.json",
+  "type": "object",
+  "required": ["id", "version", "title", "starter_file", "template_path", "expected_solution_file"],
+  "properties": {
+    "id": { "type": "string" },
+    "version": { "type": "integer", "minimum": 1 },
+    "title": { "type": "string" },
+    "starter_file": { "type": "string" },
+    "template_path": { "type": "string" },
+    "expected_solution_file": { "type": "string" },
+    "hints": { "type": "array", "items": { "type": "string" } }
+  }
+}

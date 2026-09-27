@@ -1,0 +1,35 @@
+{
+  "id": "unit.rust.ownership.v1",
+  "version": 1,
+  "title": "Rust Ownership",
+  "learning_objectives": [
+    "Explain move semantics and ownership transfer.",
+    "Use immutable references to avoid moving owned values.",
+    "Interpret common ownership compiler errors."
+  ],
+  "prerequisite_unit_ids": [
+    "unit.rust.variables.v1",
+    "unit.rust.functions.v1"
+  ],
+  "explanation": "Ownership gives each value a single owner. Moves transfer ownership, while references allow temporary borrowing.",
+  "examples": [
+    {
+      "id": "example.move-error",
+      "title": "Move error",
+      "code": "fn main() {\n    let text = String::from(\"hello\");\n    consume(text);\n    // println!(\"{text}\"); // moved value\n}\n\nfn consume(data: String) {\n    println!(\"{data}\");\n}"
+    },
+    {
+      "id": "example.borrow-fix",
+      "title": "Borrowing fix",
+      "code": "fn main() {\n    let text = String::from(\"hello\");\n    print_twice(&text);\n    println!(\"{text}\");\n}\n\nfn print_twice(data: &str) {\n    println!(\"{data}\");\n    println!(\"{data}\");\n}"
+    }
+  ],
+  "compiler_error_examples": [
+    "error[E0382]: borrow of moved value"
+  ],
+  "exercise_id": "exercise.rust.ownership.print-twice.v1",
+  "completion_criteria": [
+    "All exercise tests pass",
+    "Learner can explain why `&str` borrowing keeps ownership"
+  ]
+}

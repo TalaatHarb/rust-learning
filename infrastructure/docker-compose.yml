@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: rust-learning-postgres
+    environment:
+      POSTGRES_USER: rust_learning
+      POSTGRES_PASSWORD: rust_learning
+      POSTGRES_DB: rust_learning
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rust_learning -d rust_learning"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: rust-learning-keycloak
+    command:
+      - start-dev
+      - --import-realm
+    environment:
+      KC_HTTP_PORT: 8081
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  executor:
+    build:
+      context: ..
+      dockerfile: apps/executor/Dockerfile
+    container_name: rust-learning-executor
+    user: "1000:1000"
+    read_only: true
+    tmpfs:
+      - /tmp
+    network_mode: "none"
+    pids_limit: 128
+    mem_limit: 512m
+    environment:
+      EXECUTOR_HOST: 0.0.0.0
+      EXECUTOR_PORT: 8082
+      EXECUTOR_TIMEOUT_SECS: 8
+      EXECUTOR_OUTPUT_LIMIT_BYTES: 20000
+      RUST_LOG: info
+    ports:
+      - "8082:8082"
