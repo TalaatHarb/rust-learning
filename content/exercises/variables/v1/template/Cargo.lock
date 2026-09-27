@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "ownership_exercise"
+name = "variables_exercise"
 version = "0.1.0"

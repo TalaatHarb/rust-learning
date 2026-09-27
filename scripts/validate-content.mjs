@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync, existsSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 
@@ -133,6 +133,24 @@ for (const [unitId, unit] of unitFiles.entries()) {
     encoding: 'utf-8',
   })
   assert(cargoCheck.status === 0, `Exercise template must compile at ${templatePath}:\n${cargoCheck.stderr}`)
+
+  const starterSource = readFileSync(starterPath, 'utf-8')
+  const solutionSource = readFileSync(expectedSolutionPath, 'utf-8')
+
+  try {
+    writeFileSync(starterPath, solutionSource)
+    const cargoTest = spawnSync('cargo', ['test', '--quiet'], {
+      cwd: templatePath,
+      stdio: 'pipe',
+      encoding: 'utf-8',
+    })
+    assert(
+      cargoTest.status === 0,
+      `Exercise solution tests must pass at ${templatePath}:\n${cargoTest.stderr}`,
+    )
+  } finally {
+    writeFileSync(starterPath, starterSource)
+  }
 }
 
 console.log('Content validation passed')
