@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process'
 
 const root = resolve(new URL('..', import.meta.url).pathname)
 const contentRoot = join(root, 'content')
-const roadmapPath = join(contentRoot, 'roadmaps', 'foundations.json')
+const roadmapsRoot = join(contentRoot, 'roadmaps')
 
 function listJsonFiles(dir) {
   const entries = readdirSync(dir)
@@ -34,9 +34,13 @@ function loadJson(path) {
   return JSON.parse(readFileSync(path, 'utf-8'))
 }
 
-const roadmap = loadJson(roadmapPath)
-assert(typeof roadmap.id === 'string', 'Roadmap must have string id')
-assert(Array.isArray(roadmap.modules), 'Roadmap modules must be an array')
+function deriveSlug(id, expectedPrefix) {
+  const parts = id.split('.')
+  assert(parts[0] === expectedPrefix, `Expected ${expectedPrefix} id format, received ${id}`)
+  const slug = parts.at(2)
+  assert(typeof slug === 'string' && slug.length > 0, `Unable to derive slug from id ${id}`)
+  return slug
+}
 
 const allJsonFiles = listJsonFiles(contentRoot)
 const ids = []
@@ -50,68 +54,90 @@ const duplicateIds = ids
   .filter((id, index, arr) => arr.indexOf(id) !== index)
 assert(duplicateIds.length === 0, `Duplicate content IDs detected: ${duplicateIds.join(', ')}`)
 
-const roadmapUnitIds = roadmap.modules.flatMap((module) => module.unit_ids ?? [])
-assert(roadmapUnitIds.length > 0, 'Roadmap must include at least one unit id')
+const roadmapFiles = listJsonFiles(roadmapsRoot)
+assert(roadmapFiles.length > 0, 'At least one roadmap file is required')
+
+const referencedUnitIds = new Set()
+for (const roadmapFile of roadmapFiles) {
+  const roadmap = loadJson(roadmapFile)
+  assert(typeof roadmap.id === 'string', `Roadmap must have string id: ${roadmapFile}`)
+  assert(typeof roadmap.title === 'string', `Roadmap must have title: ${roadmapFile}`)
+  assert(Array.isArray(roadmap.modules), `Roadmap modules must be an array: ${roadmapFile}`)
+
+  for (const module of roadmap.modules) {
+    assert(typeof module.id === 'string', `Roadmap module id must be string: ${roadmapFile}`)
+    assert(typeof module.title === 'string', `Roadmap module title must be string: ${roadmapFile}`)
+    assert(Array.isArray(module.unit_ids), `Roadmap module unit_ids must be an array: ${roadmapFile}`)
+
+    for (const unitId of module.unit_ids) {
+      assert(typeof unitId === 'string', `Roadmap unit id must be string: ${roadmapFile}`)
+      referencedUnitIds.add(unitId)
+    }
+  }
+}
+
+assert(referencedUnitIds.size > 0, 'Roadmaps must include at least one unit id')
 
 const unitFiles = new Map()
-for (const unitId of roadmapUnitIds) {
-  const slug = unitId.split('.').at(2)
-  assert(typeof slug === 'string' && slug.length > 0, `Unable to derive slug from unit id ${unitId}`)
-
+for (const unitId of referencedUnitIds) {
+  const slug = deriveSlug(unitId, 'unit')
   const unitPath = join(contentRoot, 'units', `${slug}.json`)
   assert(existsSync(unitPath), `Unit file does not exist: ${unitPath}`)
 
   const unit = loadJson(unitPath)
   assert(unit.id === unitId, `Unit id mismatch for ${unitPath}; expected ${unitId}`)
+  assert(typeof unit.title === 'string', `Unit title must be string: ${unitPath}`)
+  assert(Array.isArray(unit.learning_objectives), `Unit learning_objectives must be an array: ${unitPath}`)
   assert(Array.isArray(unit.prerequisite_unit_ids), `Unit prerequisites must be an array: ${unitPath}`)
   assert(typeof unit.exercise_id === 'string', `Unit exercise_id must be a string: ${unitPath}`)
 
-  unitFiles.set(unit.id, unit)
+  unitFiles.set(unit.id, { unit, slug, unitPath })
 }
 
-for (const [unitId, unit] of unitFiles.entries()) {
+for (const [unitId, { unit, unitPath }] of unitFiles.entries()) {
   for (const prerequisiteId of unit.prerequisite_unit_ids) {
-    assert(typeof prerequisiteId === 'string', `Prerequisite ID must be string in ${unitId}`)
+    assert(typeof prerequisiteId === 'string', `Prerequisite ID must be string in ${unitPath}`)
     assert(
       unitFiles.has(prerequisiteId),
-      `Prerequisite ${prerequisiteId} for unit ${unitId} must exist in roadmap units`,
+      `Prerequisite ${prerequisiteId} for unit ${unitId} must exist in roadmap-linked units`,
     )
   }
 }
 
 const visiting = new Set()
 const visited = new Set()
-function detectCycle(node) {
-  if (visiting.has(node)) return true
-  if (visited.has(node)) return false
-
-  visiting.add(node)
-  const unit = unitFiles.get(node)
-  for (const dependency of unit?.prerequisite_unit_ids ?? []) {
-    if (detectCycle(dependency)) return true
+function detectCycle(unitId, stack = []) {
+  if (visiting.has(unitId)) {
+    return [...stack, unitId]
   }
-  visiting.delete(node)
-  visited.add(node)
-  return false
+  if (visited.has(unitId)) return null
+
+  visiting.add(unitId)
+  const unit = unitFiles.get(unitId)?.unit
+  for (const dependency of unit?.prerequisite_unit_ids ?? []) {
+    const cycle = detectCycle(dependency, [...stack, unitId])
+    if (cycle) return cycle
+  }
+  visiting.delete(unitId)
+  visited.add(unitId)
+  return null
 }
 
 for (const unitId of unitFiles.keys()) {
-  assert(!detectCycle(unitId), `Dependency cycle detected in unit prerequisites at ${unitId}`)
+  const cycle = detectCycle(unitId)
+  if (cycle) {
+    throw new Error(`Dependency cycle detected in unit prerequisites: ${cycle.join(' -> ')}`)
+  }
 }
 
-for (const [unitId, unit] of unitFiles.entries()) {
-  const exerciseDomain = unit.exercise_id.split('.')
-  const exerciseSlug = exerciseDomain.at(2)
-  assert(
-    typeof exerciseSlug === 'string' && exerciseSlug.length > 0,
-    `Unable to derive exercise slug for ${unitId}`,
-  )
-
+for (const [unitId, { unit }] of unitFiles.entries()) {
+  const exerciseSlug = deriveSlug(unit.exercise_id, 'exercise')
   const exercisePath = join(contentRoot, 'exercises', `${exerciseSlug}.json`)
   assert(existsSync(exercisePath), `Exercise file does not exist: ${exercisePath}`)
 
   const exercise = loadJson(exercisePath)
   assert(exercise.id === unit.exercise_id, `Exercise id mismatch for unit ${unitId}`)
+  assert(typeof exercise.title === 'string', `Exercise title is required for ${exercisePath}`)
   assert(typeof exercise.template_path === 'string', `Exercise template_path is required for ${unitId}`)
   assert(typeof exercise.starter_file === 'string', `Exercise starter_file is required for ${unitId}`)
   assert(

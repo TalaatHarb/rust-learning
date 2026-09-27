@@ -1,0 +1,12 @@
+{
+  "id": "exercise.rust.control-flow.classify-number.v1",
+  "version": 1,
+  "title": "Classify a number",
+  "starter_file": "src/lib.rs",
+  "template_path": "content/exercises/control-flow/v1/template",
+  "expected_solution_file": "src/lib.solution.rs",
+  "hints": [
+    "Use an `if` / `else if` / `else` chain.",
+    "Every branch should return the same string slice type."
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "id": "unit.rust.borrowing.v1",
+  "version": 1,
+  "title": "Rust Borrowing",
+  "learning_objectives": [
+    "Use immutable borrows to read owned values without moving them.",
+    "Choose borrowed parameters when a function does not need ownership.",
+    "Recognize borrow checker errors caused by conflicting access."
+  ],
+  "prerequisite_unit_ids": [
+    "unit.rust.ownership.v1"
+  ],
+  "explanation": "Borrowing lets code inspect data through references while the owner keeps control of the value.",
+  "examples": [
+    {
+      "id": "example.borrow-read",
+      "title": "Borrow to inspect text",
+      "code": "fn greeting_length(message: &String) -> usize {\n    message.len()\n}\n\nfn main() {\n    let greeting = String::from(\"hello\");\n    println!(\"{}\", greeting_length(&greeting));\n    println!(\"{greeting}\");\n}"
+    },
+    {
+      "id": "example.borrow-str",
+      "title": "Borrow as `&str`",
+      "code": "fn starts_with_rust(topic: &str) -> bool {\n    topic.starts_with(\"Rust\")\n}"
+    }
+  ],
+  "compiler_error_examples": [
+    "error[E0502]: cannot borrow as mutable because it is also borrowed as immutable"
+  ],
+  "exercise_id": "exercise.rust.borrowing.longer-label.v1",
+  "completion_criteria": [
+    "Exercise tests pass",
+    "Learner can explain why reading through a borrow preserves ownership"
+  ]
+}

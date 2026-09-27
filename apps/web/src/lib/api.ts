@@ -1,5 +1,6 @@
 import type {
   AttemptResponse,
+  RoadmapResponse,
   ProgressOverviewResponse,
   SubmissionResponse,
   UnitResponse,
@@ -31,6 +32,10 @@ function withAuth(token: string): Record<string, string> {
 
 export function fetchUnit(unitId: string) {
   return request<UnitResponse>(`/api/v1/units/${unitId}`)
+}
+
+export function fetchRoadmap() {
+  return request<RoadmapResponse>('/api/v1/roadmaps/foundations')
 }
 
 export function submitExercise(token: string, payload: { exercise_id: string; code: string }) {

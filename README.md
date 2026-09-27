@@ -51,6 +51,7 @@ This repository now includes:
 - Keycloak-ready OIDC web login/logout integration
 - Axum JWT-protected endpoints (`/api/v1/me`, attempts, progress)
 - SQLx migrations + PostgreSQL persistence (users/attempts/progress)
-- Ownership learning unit served from content files
+- Foundations roadmap API plus Variables, Functions, Control Flow, Ownership, Borrowing, References, and Slices learning units served from content files
 - End-to-end exercise submission flow to executor (`cargo check` + `cargo test`)
+- Per-unit progress overview with resume-learning metadata
 - Executor timeout/output limits and container hardening baseline

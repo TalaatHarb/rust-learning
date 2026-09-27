@@ -1,0 +1,34 @@
+{
+  "id": "unit.rust.references.v1",
+  "version": 1,
+  "title": "Rust References",
+  "learning_objectives": [
+    "Use mutable references to update data in place.",
+    "Distinguish immutable and mutable references in function signatures.",
+    "Apply dereference-free mutation through `&mut` parameters."
+  ],
+  "prerequisite_unit_ids": [
+    "unit.rust.borrowing.v1"
+  ],
+  "explanation": "References point at existing data. Mutable references allow a function to change that data without taking ownership.",
+  "examples": [
+    {
+      "id": "example.mutable-reference",
+      "title": "Update through `&mut`",
+      "code": "fn add_excitement(message: &mut String) {\n    message.push('!');\n}\n\nfn main() {\n    let mut message = String::from(\"Rust\");\n    add_excitement(&mut message);\n    println!(\"{message}\");\n}"
+    },
+    {
+      "id": "example.mutable-vector",
+      "title": "Mutate a vector through a reference",
+      "code": "fn push_default(values: &mut Vec<i32>) {\n    values.push(0);\n}"
+    }
+  ],
+  "compiler_error_examples": [
+    "error[E0596]: cannot borrow as mutable"
+  ],
+  "exercise_id": "exercise.rust.references.append-rust.v1",
+  "completion_criteria": [
+    "Exercise tests pass",
+    "Learner can update owned data by passing a mutable reference"
+  ]
+}

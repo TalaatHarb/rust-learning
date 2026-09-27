@@ -1,0 +1,12 @@
+{
+  "id": "exercise.rust.slices.first-word.v1",
+  "version": 1,
+  "title": "Return the first word slice",
+  "starter_file": "src/lib.rs",
+  "template_path": "content/exercises/slices/v1/template",
+  "expected_solution_file": "src/lib.solution.rs",
+  "hints": [
+    "Look for the first space with `find`.",
+    "Return a slice of the original `&str` instead of creating a new string."
+  ]
+}

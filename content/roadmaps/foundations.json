@@ -8,7 +8,11 @@
       "unit_ids": [
         "unit.rust.variables.v1",
         "unit.rust.functions.v1",
-        "unit.rust.ownership.v1"
+        "unit.rust.control-flow.v1",
+        "unit.rust.ownership.v1",
+        "unit.rust.borrowing.v1",
+        "unit.rust.references.v1",
+        "unit.rust.slices.v1"
       ]
     }
   ]

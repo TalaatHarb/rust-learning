@@ -213,6 +213,18 @@ fn map_template_path(exercise_id: &str) -> anyhow::Result<&'static Path> {
         "exercise.rust.ownership.print-twice.v1" => {
             Ok(Path::new("content/exercises/ownership/v1/template"))
         }
+        "exercise.rust.control-flow.classify-number.v1" => {
+            Ok(Path::new("content/exercises/control-flow/v1/template"))
+        }
+        "exercise.rust.borrowing.longer-label.v1" => {
+            Ok(Path::new("content/exercises/borrowing/v1/template"))
+        }
+        "exercise.rust.references.append-rust.v1" => {
+            Ok(Path::new("content/exercises/references/v1/template"))
+        }
+        "exercise.rust.slices.first-word.v1" => {
+            Ok(Path::new("content/exercises/slices/v1/template"))
+        }
         _ => anyhow::bail!("unsupported exercise_id: {exercise_id}"),
     }
 }

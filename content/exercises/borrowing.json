@@ -1,0 +1,12 @@
+{
+  "id": "exercise.rust.borrowing.longer-label.v1",
+  "version": 1,
+  "title": "Choose the longer label",
+  "starter_file": "src/lib.rs",
+  "template_path": "content/exercises/borrowing/v1/template",
+  "expected_solution_file": "src/lib.solution.rs",
+  "hints": [
+    "Borrow both inputs as `&str`.",
+    "Return one of the borrowed inputs instead of allocating a new `String`."
+  ]
+}
