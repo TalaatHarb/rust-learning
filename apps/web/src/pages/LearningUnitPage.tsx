@@ -1,19 +1,21 @@
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { CodeBlock } from '../components/CodeBlock'
 import { CodeEditor } from '../components/CodeEditor'
-import { fetchOwnershipUnit } from '../lib/api'
+import { fetchUnit } from '../lib/api'
 
 export function LearningUnitPage() {
+  const { unitId = 'ownership' } = useParams()
+
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['unit', 'ownership'],
-    queryFn: fetchOwnershipUnit,
+    queryKey: ['unit', unitId],
+    queryFn: () => fetchUnit(unitId),
   })
 
   if (isLoading) {
     return (
       <section className="panel">
-        <h2>Rust Ownership</h2>
+        <h2>Learning Unit</h2>
         <p>Loading learning unit...</p>
       </section>
     )
@@ -22,7 +24,7 @@ export function LearningUnitPage() {
   if (isError || !data) {
     return (
       <section className="panel">
-        <h2>Rust Ownership</h2>
+        <h2>Learning Unit</h2>
         <p>{error instanceof Error ? error.message : 'Failed to load learning unit.'}</p>
       </section>
     )
@@ -53,7 +55,7 @@ export function LearningUnitPage() {
       ))}
       <CodeEditor code={data.starter_code} readOnly />
       <div className="actions">
-        <Link className="inline-link" to="/exercise/ownership">
+        <Link className="inline-link" to={`/exercise/${unitId}`}>
           Start Exercise
         </Link>
       </div>

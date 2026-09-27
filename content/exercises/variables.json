@@ -1,0 +1,12 @@
+{
+  "id": "exercise.rust.variables.mutable-counter.v1",
+  "version": 1,
+  "title": "Make the counter mutable",
+  "starter_file": "src/lib.rs",
+  "template_path": "content/exercises/variables/v1/template",
+  "expected_solution_file": "src/lib.solution.rs",
+  "hints": [
+    "Rust variables are immutable unless declared with `mut`.",
+    "Only the binding needs to change; the value type stays `i32`."
+  ]
+}

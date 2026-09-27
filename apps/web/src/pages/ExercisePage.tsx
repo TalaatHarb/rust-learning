@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useAuth } from 'react-oidc-context'
 import { CodeEditor } from '../components/CodeEditor'
-import { fetchOwnershipUnit, submitExercise } from '../lib/api'
+import { fetchUnit, submitExercise } from '../lib/api'
 
 export function ExercisePage() {
   const auth = useAuth()
   const navigate = useNavigate()
+  const { unitId = 'ownership' } = useParams()
   const [submissionError, setSubmissionError] = useState<string | null>(null)
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['unit', 'ownership'],
-    queryFn: fetchOwnershipUnit,
+    queryKey: ['unit', unitId],
+    queryFn: () => fetchUnit(unitId),
   })
 
   const [code, setCode] = useState('')
@@ -69,7 +70,7 @@ export function ExercisePage() {
     <>
       <section className="panel">
         <h2>Exercise</h2>
-        <p>Update the function so ownership is preserved and tests pass.</p>
+        <p>Implement the exercise and run tests.</p>
         <h3>Hints</h3>
         <ul>
           {data.hints.map((hint) => (

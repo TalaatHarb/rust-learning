@@ -29,8 +29,8 @@ function withAuth(token: string): Record<string, string> {
   return { Authorization: `${prefix} ${token}` }
 }
 
-export function fetchOwnershipUnit() {
-  return request<UnitResponse>('/api/v1/units/ownership')
+export function fetchUnit(unitId: string) {
+  return request<UnitResponse>(`/api/v1/units/${unitId}`)
 }
 
 export function submitExercise(token: string, payload: { exercise_id: string; code: string }) {

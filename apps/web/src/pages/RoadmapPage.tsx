@@ -1,21 +1,31 @@
+import { Link } from 'react-router-dom'
+
 const milestones = [
-  'Variables',
-  'Functions',
-  'Control flow',
-  'Ownership',
-  'Borrowing',
-  'References',
-  'Slices',
+  { id: 'variables', label: 'Variables' },
+  { id: 'functions', label: 'Functions' },
+  { id: 'ownership', label: 'Ownership' },
+  { id: 'control-flow', label: 'Control flow (planned)' },
+  { id: 'borrowing', label: 'Borrowing (planned)' },
+  { id: 'references', label: 'References (planned)' },
+  { id: 'slices', label: 'Slices (planned)' },
 ]
 
 export function RoadmapPage() {
   return (
     <section className="panel">
       <h2>Roadmap</h2>
-      <p>First complete vertical slice focuses on the Ownership module.</p>
+      <p>Current implemented unit flow covers Variables, Functions, and Ownership.</p>
       <ul>
         {milestones.map((milestone) => (
-          <li key={milestone}>{milestone}</li>
+          <li key={milestone.id}>
+            {['variables', 'functions', 'ownership'].includes(milestone.id) ? (
+              <Link className="inline-link" to={`/unit/${milestone.id}`}>
+                {milestone.label}
+              </Link>
+            ) : (
+              milestone.label
+            )}
+          </li>
         ))}
       </ul>
     </section>

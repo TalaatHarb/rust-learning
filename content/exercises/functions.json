@@ -1,0 +1,12 @@
+{
+  "id": "exercise.rust.functions.rectangle-area.v1",
+  "version": 1,
+  "title": "Compute rectangle area",
+  "starter_file": "src/lib.rs",
+  "template_path": "content/exercises/functions/v1/template",
+  "expected_solution_file": "src/lib.solution.rs",
+  "hints": [
+    "Use both function parameters in the returned expression.",
+    "The function already has the correct signature; only implement the body."
+  ]
+}
