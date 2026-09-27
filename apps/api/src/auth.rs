@@ -94,7 +94,11 @@ impl Authenticator {
                     &validation,
                 )
                 .map_err(|_| {
-                    AppError::new(StatusCode::UNAUTHORIZED, "AUTH_INVALID_TOKEN", "invalid token")
+                    AppError::new(
+                        StatusCode::UNAUTHORIZED,
+                        "AUTH_INVALID_TOKEN",
+                        "invalid token",
+                    )
                 })?
                 .claims
             }
@@ -106,11 +110,19 @@ impl Authenticator {
                 cache,
             } => {
                 let header = decode_header(token).map_err(|_| {
-                    AppError::new(StatusCode::UNAUTHORIZED, "AUTH_INVALID_TOKEN", "invalid token header")
+                    AppError::new(
+                        StatusCode::UNAUTHORIZED,
+                        "AUTH_INVALID_TOKEN",
+                        "invalid token header",
+                    )
                 })?;
 
                 let kid = header.kid.ok_or_else(|| {
-                    AppError::new(StatusCode::UNAUTHORIZED, "AUTH_INVALID_TOKEN", "missing key id")
+                    AppError::new(
+                        StatusCode::UNAUTHORIZED,
+                        "AUTH_INVALID_TOKEN",
+                        "missing key id",
+                    )
                 })?;
 
                 let jwk_set = {
@@ -127,18 +139,34 @@ impl Authenticator {
                 };
 
                 let jwk = find_key(&jwk_set, &kid).ok_or_else(|| {
-                    AppError::new(StatusCode::UNAUTHORIZED, "AUTH_INVALID_TOKEN", "unknown key id")
+                    AppError::new(
+                        StatusCode::UNAUTHORIZED,
+                        "AUTH_INVALID_TOKEN",
+                        "unknown key id",
+                    )
                 })?;
 
                 let mut validation = Validation::new(Algorithm::RS256);
                 validation.set_issuer(&[issuer]);
                 validation.set_audience(&[audience]);
 
-                decode::<Claims>(token, &DecodingKey::from_jwk(jwk).map_err(|_| {
-                    AppError::new(StatusCode::UNAUTHORIZED, "AUTH_INVALID_TOKEN", "invalid jwk")
-                })?, &validation)
+                decode::<Claims>(
+                    token,
+                    &DecodingKey::from_jwk(jwk).map_err(|_| {
+                        AppError::new(
+                            StatusCode::UNAUTHORIZED,
+                            "AUTH_INVALID_TOKEN",
+                            "invalid jwk",
+                        )
+                    })?,
+                    &validation,
+                )
                 .map_err(|_| {
-                    AppError::new(StatusCode::UNAUTHORIZED, "AUTH_INVALID_TOKEN", "invalid token")
+                    AppError::new(
+                        StatusCode::UNAUTHORIZED,
+                        "AUTH_INVALID_TOKEN",
+                        "invalid token",
+                    )
                 })?
                 .claims
             }
@@ -159,16 +187,21 @@ fn find_key<'a>(jwk_set: &'a JwkSet, kid: &str) -> Option<&'a Jwk> {
 }
 
 async fn fetch_jwks(client: &Client, url: &str) -> Result<JwkSet, AppError> {
-    let response = client
-        .get(url)
-        .send()
-        .await
-        .map_err(|_| AppError::new(StatusCode::UNAUTHORIZED, "AUTH_JWKS_UNAVAILABLE", "jwks unavailable"))?;
+    let response = client.get(url).send().await.map_err(|_| {
+        AppError::new(
+            StatusCode::UNAUTHORIZED,
+            "AUTH_JWKS_UNAVAILABLE",
+            "jwks unavailable",
+        )
+    })?;
 
-    response
-        .json::<JwkSet>()
-        .await
-        .map_err(|_| AppError::new(StatusCode::UNAUTHORIZED, "AUTH_JWKS_INVALID", "invalid jwks response"))
+    response.json::<JwkSet>().await.map_err(|_| {
+        AppError::new(
+            StatusCode::UNAUTHORIZED,
+            "AUTH_JWKS_INVALID",
+            "invalid jwks response",
+        )
+    })
 }
 
 impl<S> FromRequestParts<S> for AuthenticatedUser

@@ -31,7 +31,8 @@ impl Config {
 
         let jwt_issuer = env::var("JWT_ISSUER")
             .unwrap_or_else(|_| "http://localhost:8081/realms/rust-learning".to_string());
-        let jwt_audience = env::var("JWT_AUDIENCE").unwrap_or_else(|_| "rust-learning-web".to_string());
+        let jwt_audience =
+            env::var("JWT_AUDIENCE").unwrap_or_else(|_| "rust-learning-web".to_string());
         let jwt_jwks_url = env::var("JWT_JWKS_URL").unwrap_or_else(|_| {
             "http://localhost:8081/realms/rust-learning/protocol/openid-connect/certs".to_string()
         });

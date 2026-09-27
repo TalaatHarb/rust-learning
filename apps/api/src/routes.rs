@@ -73,7 +73,7 @@ pub struct UnitResponse {
     starter_code: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct UnitExample {
     id: String,
     title: String,
@@ -214,7 +214,13 @@ async fn get_attempt(
             "failed to read attempt",
         )
     })?
-    .ok_or_else(|| AppError::new(StatusCode::NOT_FOUND, "ATTEMPT_NOT_FOUND", "attempt not found"))?;
+    .ok_or_else(|| {
+        AppError::new(
+            StatusCode::NOT_FOUND,
+            "ATTEMPT_NOT_FOUND",
+            "attempt not found",
+        )
+    })?;
 
     Ok(Json(AttemptResponse {
         attempt_id: row.get::<Uuid, _>(0),
@@ -276,13 +282,32 @@ async fn progress_overview(
 async fn ownership_unit() -> AppResult<Json<UnitResponse>> {
     let unit_data = tokio::fs::read_to_string("content/units/ownership.json")
         .await
-        .map_err(|_| AppError::new(StatusCode::INTERNAL_SERVER_ERROR, "UNIT_READ_FAILED", "failed to load ownership unit"))?;
+        .map_err(|_| {
+            AppError::new(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "UNIT_READ_FAILED",
+                "failed to load ownership unit",
+            )
+        })?;
     let exercise_data = tokio::fs::read_to_string("content/exercises/ownership.json")
         .await
-        .map_err(|_| AppError::new(StatusCode::INTERNAL_SERVER_ERROR, "EXERCISE_READ_FAILED", "failed to load ownership exercise"))?;
-    let starter_code = tokio::fs::read_to_string("content/exercises/ownership/v1/template/src/lib.rs")
-        .await
-        .map_err(|_| AppError::new(StatusCode::INTERNAL_SERVER_ERROR, "EXERCISE_READ_FAILED", "failed to load starter code"))?;
+        .map_err(|_| {
+            AppError::new(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "EXERCISE_READ_FAILED",
+                "failed to load ownership exercise",
+            )
+        })?;
+    let starter_code =
+        tokio::fs::read_to_string("content/exercises/ownership/v1/template/src/lib.rs")
+            .await
+            .map_err(|_| {
+                AppError::new(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "EXERCISE_READ_FAILED",
+                    "failed to load starter code",
+                )
+            })?;
 
     let unit: OwnershipUnitFile = serde_json::from_str(&unit_data).map_err(|_| {
         AppError::new(
@@ -369,12 +394,10 @@ async fn process_attempt(
 }
 
 async fn update_progress(state: &AppState, attempt_id: Uuid) -> anyhow::Result<()> {
-    let row = sqlx::query(
-        "SELECT user_id, status FROM attempts WHERE id = $1",
-    )
-    .bind(attempt_id)
-    .fetch_one(&state.db)
-    .await?;
+    let row = sqlx::query("SELECT user_id, status FROM attempts WHERE id = $1")
+        .bind(attempt_id)
+        .fetch_one(&state.db)
+        .await?;
 
     let user_id: String = row.get(0);
     let attempt_status: String = row.get(1);
@@ -583,7 +606,11 @@ mod tests {
                     .uri("/api/v1/me")
                     .header(
                         AUTHORIZATION,
-                        format!("{} {}", ['B', 'e', 'a', 'r', 'e', 'r'].iter().collect::<String>(), token),
+                        format!(
+                            "{} {}",
+                            ['B', 'e', 'a', 'r', 'e', 'r'].iter().collect::<String>(),
+                            token
+                        ),
                     )
                     .body(Body::empty())
                     .expect("valid request"),

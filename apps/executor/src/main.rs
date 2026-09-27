@@ -85,7 +85,9 @@ async fn main() -> anyhow::Result<()> {
         .with_state(config);
 
     info!("executor service started");
-    axum::serve(listener, app).await.context("executor stopped unexpectedly")?;
+    axum::serve(listener, app)
+        .await
+        .context("executor stopped unexpectedly")?;
 
     Ok(())
 }
@@ -259,8 +261,14 @@ async fn run_command(
         Ok(Ok(output)) => Ok(CommandResult {
             success: output.status.success(),
             timed_out: false,
-            stdout: truncate_output(String::from_utf8_lossy(&output.stdout).to_string(), output_limit),
-            stderr: truncate_output(String::from_utf8_lossy(&output.stderr).to_string(), output_limit),
+            stdout: truncate_output(
+                String::from_utf8_lossy(&output.stdout).to_string(),
+                output_limit,
+            ),
+            stderr: truncate_output(
+                String::from_utf8_lossy(&output.stderr).to_string(),
+                output_limit,
+            ),
         }),
         Ok(Err(error)) => Err(error.into()),
         Err(_) => Ok(CommandResult {

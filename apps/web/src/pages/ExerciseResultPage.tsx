@@ -14,7 +14,8 @@ export function ExerciseResultPage() {
     queryKey: ['attempt', attemptId],
     queryFn: () => fetchAttempt(auth.user!.access_token, attemptId),
     enabled: shouldFetch,
-    refetchInterval: (data) => {
+    refetchInterval: (queryState) => {
+      const data = queryState.state.data
       if (!data) return 1500
       return data.status === 'QUEUED' || data.status === 'RUNNING' ? 1500 : false
     },

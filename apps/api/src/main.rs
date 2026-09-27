@@ -34,13 +34,17 @@ async fn main() -> anyhow::Result<()> {
     let pool = db::connect(&config.database_url)
         .await
         .context("failed to connect to postgres")?;
-    sqlx::migrate!("./apps/api/migrations")
+    sqlx::migrate!("./migrations")
         .run(&pool)
         .await
         .context("failed to run migrations")?;
 
     let auth = if let Some(secret) = config.jwt_hs256_secret.clone() {
-        Authenticator::hs256(secret, config.jwt_issuer.clone(), config.jwt_audience.clone())
+        Authenticator::hs256(
+            secret,
+            config.jwt_issuer.clone(),
+            config.jwt_audience.clone(),
+        )
     } else {
         Authenticator::jwks(
             config.jwt_issuer.clone(),
