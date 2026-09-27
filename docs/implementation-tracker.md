@@ -12,8 +12,8 @@
 
 ## Next planned tasks
 
-- [ ] Add learning units and exercises for Control Flow, Borrowing, References, and Slices.
-- [ ] Add roadmap/content endpoint to serve module/unit metadata directly to the web app.
-- [ ] Track progress per unit in dashboard/progress views (not only Ownership).
-- [ ] Add integration tests for multi-unit submission and progress updates.
-- [ ] Expand validation to include roadmap dependency cycles across all unit graphs.
+- [ ] **Curriculum expansion:** add the next four fundamentals units and exercises — Control Flow, Borrowing, References, and Slices — so the current foundations roadmap goes beyond Variables, Functions, and Ownership.
+- [ ] **Roadmap API slice:** add a roadmap/content endpoint that returns module and unit metadata from `content/roadmaps/foundations.json` for the web app instead of maintaining planned units inline in the UI.
+- [ ] **Progress tracking follow-up:** expand dashboard and progress views to show per-unit status across all implemented units, plus resume-learning behavior based on the next incomplete unit.
+- [ ] **Integration coverage:** add end-to-end API/executor tests that submit solutions for multiple units and verify attempt persistence plus progress transitions.
+- [ ] **Content graph validation:** extend `npm run content:validate` to detect missing references and prerequisite dependency cycles across all roadmap-linked units before adding more curriculum content.
