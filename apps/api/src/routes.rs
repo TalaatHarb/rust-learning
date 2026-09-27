@@ -39,7 +39,7 @@ pub struct SubmissionRequest {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SubmissionResponse {
     attempt_id: Uuid,
-    status: &'static str,
+    status: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -264,7 +264,7 @@ async fn submit_attempt(
 
     Ok(Json(SubmissionResponse {
         attempt_id,
-        status: "QUEUED",
+        status: "QUEUED".to_string(),
     }))
 }
 

@@ -125,7 +125,9 @@ function detectCycle(unitId, stack = []) {
 
 for (const unitId of unitFiles.keys()) {
   const cycle = detectCycle(unitId)
-  assert(!cycle, `Dependency cycle detected in unit prerequisites: ${cycle.join(' -> ')}`)
+  if (cycle) {
+    throw new Error(`Dependency cycle detected in unit prerequisites: ${cycle.join(' -> ')}`)
+  }
 }
 
 for (const [unitId, { unit }] of unitFiles.entries()) {
