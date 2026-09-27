@@ -204,6 +204,12 @@ async fn execute_inner(
 
 fn map_template_path(exercise_id: &str) -> anyhow::Result<&'static Path> {
     match exercise_id {
+        "exercise.rust.variables.mutable-counter.v1" => {
+            Ok(Path::new("content/exercises/variables/v1/template"))
+        }
+        "exercise.rust.functions.rectangle-area.v1" => {
+            Ok(Path::new("content/exercises/functions/v1/template"))
+        }
         "exercise.rust.ownership.print-twice.v1" => {
             Ok(Path::new("content/exercises/ownership/v1/template"))
         }

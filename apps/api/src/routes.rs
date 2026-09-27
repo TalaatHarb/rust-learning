@@ -8,6 +8,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use sqlx::Row;
+use std::io::ErrorKind;
 use tracing::{error, info};
 use uuid::Uuid;
 
@@ -81,7 +82,7 @@ pub struct UnitExample {
 }
 
 #[derive(Debug, Deserialize)]
-struct OwnershipUnitFile {
+struct UnitFile {
     id: String,
     title: String,
     learning_objectives: Vec<String>,
@@ -93,8 +94,17 @@ struct OwnershipUnitFile {
 }
 
 #[derive(Debug, Deserialize)]
-struct OwnershipExerciseFile {
+struct ExerciseFile {
+    id: String,
+    starter_file: String,
+    template_path: String,
     hints: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct UnitExerciseIndex {
+    id: String,
+    exercise_id: String,
 }
 
 pub fn router(state: AppState) -> Router {
@@ -104,7 +114,7 @@ pub fn router(state: AppState) -> Router {
         .route("/api/v1/attempts/submissions", post(submit_attempt))
         .route("/api/v1/attempts/{attempt_id}", get(get_attempt))
         .route("/api/v1/progress/overview", get(progress_overview))
-        .route("/api/v1/units/ownership", get(ownership_unit))
+        .route("/api/v1/units/{unit_id}", get(unit_by_id))
         .layer(axum::middleware::from_fn(request_id_middleware))
         .with_state(state)
 }
@@ -279,48 +289,102 @@ async fn progress_overview(
     Ok(Json(response))
 }
 
-async fn ownership_unit() -> AppResult<Json<UnitResponse>> {
-    let unit_data = tokio::fs::read_to_string("content/units/ownership.json")
+async fn unit_by_id(Path(unit_id): Path<String>) -> AppResult<Json<UnitResponse>> {
+    let valid_unit_id = unit_id
+        .chars()
+        .all(|value| value.is_ascii_lowercase() || value == '-');
+    if !valid_unit_id {
+        return Err(AppError::new(
+            StatusCode::BAD_REQUEST,
+            "UNIT_INVALID_ID",
+            "invalid unit id",
+        ));
+    }
+
+    let unit_path = format!("content/units/{unit_id}.json");
+    let exercise_path = format!("content/exercises/{unit_id}.json");
+
+    let unit_data = tokio::fs::read_to_string(&unit_path)
         .await
-        .map_err(|_| {
+        .map_err(|error| {
+            if error.kind() == ErrorKind::NotFound {
+                return AppError::new(StatusCode::NOT_FOUND, "UNIT_NOT_FOUND", "unit not found");
+            }
+
             AppError::new(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "UNIT_READ_FAILED",
-                "failed to load ownership unit",
+                "failed to load unit",
             )
         })?;
-    let exercise_data = tokio::fs::read_to_string("content/exercises/ownership.json")
+    let exercise_data = tokio::fs::read_to_string(&exercise_path)
+        .await
+        .map_err(|error| {
+            if error.kind() == ErrorKind::NotFound {
+                return AppError::new(
+                    StatusCode::NOT_FOUND,
+                    "EXERCISE_NOT_FOUND",
+                    "exercise not found",
+                );
+            }
+
+            AppError::new(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "EXERCISE_READ_FAILED",
+                "failed to load exercise",
+            )
+        })?;
+    let unit: UnitFile = serde_json::from_str(&unit_data).map_err(|_| {
+        AppError::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "UNIT_PARSE_FAILED",
+            "failed to parse unit",
+        )
+    })?;
+    let exercise: ExerciseFile = serde_json::from_str(&exercise_data).map_err(|_| {
+        AppError::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "EXERCISE_PARSE_FAILED",
+            "failed to parse exercise",
+        )
+    })?;
+    if unit.exercise_id != exercise.id {
+        return Err(AppError::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "EXERCISE_MISMATCH",
+            "unit exercise mismatch",
+        ));
+    }
+
+    let template_root = tokio::fs::canonicalize(&exercise.template_path)
         .await
         .map_err(|_| {
             AppError::new(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "EXERCISE_READ_FAILED",
-                "failed to load ownership exercise",
+                "failed to load exercise template",
             )
         })?;
-    let starter_code =
-        tokio::fs::read_to_string("content/exercises/ownership/v1/template/src/lib.rs")
-            .await
-            .map_err(|_| {
-                AppError::new(
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "EXERCISE_READ_FAILED",
-                    "failed to load starter code",
-                )
-            })?;
-
-    let unit: OwnershipUnitFile = serde_json::from_str(&unit_data).map_err(|_| {
+    let starter_path = template_root.join(&exercise.starter_file);
+    let starter_path = tokio::fs::canonicalize(starter_path).await.map_err(|_| {
         AppError::new(
             StatusCode::INTERNAL_SERVER_ERROR,
-            "UNIT_PARSE_FAILED",
-            "failed to parse ownership unit",
+            "EXERCISE_READ_FAILED",
+            "failed to load starter code",
         )
     })?;
-    let exercise: OwnershipExerciseFile = serde_json::from_str(&exercise_data).map_err(|_| {
+    if !starter_path.starts_with(&template_root) {
+        return Err(AppError::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "EXERCISE_INVALID_PATH",
+            "invalid exercise starter path",
+        ));
+    }
+    let starter_code = tokio::fs::read_to_string(starter_path).await.map_err(|_| {
         AppError::new(
             StatusCode::INTERNAL_SERVER_ERROR,
-            "EXERCISE_PARSE_FAILED",
-            "failed to parse ownership exercise",
+            "EXERCISE_READ_FAILED",
+            "failed to load starter code",
         )
     })?;
 
@@ -394,13 +458,15 @@ async fn process_attempt(
 }
 
 async fn update_progress(state: &AppState, attempt_id: Uuid) -> anyhow::Result<()> {
-    let row = sqlx::query("SELECT user_id, status FROM attempts WHERE id = $1")
+    let row = sqlx::query("SELECT user_id, status, exercise_id FROM attempts WHERE id = $1")
         .bind(attempt_id)
         .fetch_one(&state.db)
         .await?;
 
     let user_id: String = row.get(0);
     let attempt_status: String = row.get(1);
+    let exercise_id: String = row.get(2);
+    let unit_id = load_unit_id_for_exercise(&exercise_id).await?;
 
     let progress_status = match attempt_status.as_str() {
         "PASSED" => "PASSED",
@@ -411,7 +477,7 @@ async fn update_progress(state: &AppState, attempt_id: Uuid) -> anyhow::Result<(
     sqlx::query(
         r#"
         INSERT INTO progress (user_id, unit_id, status, completed_attempts, latest_attempt_id)
-        VALUES ($1, 'unit.rust.ownership.v1', $2, CASE WHEN $2 = 'PASSED' THEN 1 ELSE 0 END, $3)
+        VALUES ($1, $2, $3, CASE WHEN $3 = 'PASSED' THEN 1 ELSE 0 END, $4)
         ON CONFLICT (user_id, unit_id)
         DO UPDATE SET
           status = EXCLUDED.status,
@@ -421,12 +487,32 @@ async fn update_progress(state: &AppState, attempt_id: Uuid) -> anyhow::Result<(
         "#,
     )
     .bind(user_id)
+    .bind(unit_id)
     .bind(progress_status)
     .bind(attempt_id)
     .execute(&state.db)
     .await?;
 
     Ok(())
+}
+
+async fn load_unit_id_for_exercise(exercise_id: &str) -> anyhow::Result<String> {
+    let mut unit_entries = tokio::fs::read_dir("content/units").await?;
+
+    while let Some(entry) = unit_entries.next_entry().await? {
+        let path = entry.path();
+        if path.extension().and_then(|value| value.to_str()) != Some("json") {
+            continue;
+        }
+
+        let unit_data = tokio::fs::read_to_string(path).await?;
+        let unit: UnitExerciseIndex = serde_json::from_str(&unit_data)?;
+        if unit.exercise_id == exercise_id {
+            return Ok(unit.id);
+        }
+    }
+
+    anyhow::bail!("unsupported exercise_id: {exercise_id}")
 }
 
 async fn request_id_middleware(request: Request<axum::body::Body>, next: Next) -> Response {

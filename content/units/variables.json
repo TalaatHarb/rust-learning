@@ -1,0 +1,32 @@
+{
+  "id": "unit.rust.variables.v1",
+  "version": 1,
+  "title": "Rust Variables",
+  "learning_objectives": [
+    "Distinguish immutable and mutable variable bindings.",
+    "Use `mut` when changing variable values.",
+    "Read compiler errors for invalid mutation attempts."
+  ],
+  "prerequisite_unit_ids": [],
+  "explanation": "Variables are immutable by default in Rust. Use `mut` when a value must change over time.",
+  "examples": [
+    {
+      "id": "example.immutable-binding",
+      "title": "Immutable by default",
+      "code": "fn main() {\n    let x = 5;\n    // x = 6; // cannot assign twice to immutable variable\n    println!(\"{x}\");\n}"
+    },
+    {
+      "id": "example.mutable-binding",
+      "title": "Mutable binding",
+      "code": "fn main() {\n    let mut count = 0;\n    count += 1;\n    println!(\"{count}\");\n}"
+    }
+  ],
+  "compiler_error_examples": [
+    "error[E0384]: cannot assign twice to immutable variable"
+  ],
+  "exercise_id": "exercise.rust.variables.mutable-counter.v1",
+  "completion_criteria": [
+    "Exercise tests pass",
+    "Learner can explain when `mut` is required"
+  ]
+}

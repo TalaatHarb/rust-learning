@@ -11,8 +11,9 @@ import { RoadmapPage } from './pages/RoadmapPage'
 const navItems = [
   { to: '/', label: 'Dashboard' },
   { to: '/roadmap', label: 'Roadmap' },
-  { to: '/unit/ownership', label: 'Learning Unit' },
-  { to: '/exercise/ownership', label: 'Exercise' },
+  { to: '/unit/variables', label: 'Variables Unit' },
+  { to: '/unit/functions', label: 'Functions Unit' },
+  { to: '/unit/ownership', label: 'Ownership Unit' },
   { to: '/result/latest', label: 'Result' },
   { to: '/progress', label: 'Progress' },
   { to: '/login', label: 'Login' },
@@ -57,7 +58,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/roadmap" element={<RoadmapPage />} />
             <Route path="/unit/:unitId" element={<LearningUnitPage />} />
-            <Route path="/exercise/:exerciseId" element={<ExercisePage />} />
+            <Route path="/exercise/:unitId" element={<ExercisePage />} />
             <Route path="/result/:attemptId" element={<ExerciseResultPage />} />
             <Route path="/progress" element={<ProgressPage />} />
           </Routes>
