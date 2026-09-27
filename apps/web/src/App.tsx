@@ -12,6 +12,7 @@ const navItems = [
   { to: '/roadmap', label: 'Roadmap' },
   { to: '/unit/ownership', label: 'Learning Unit' },
   { to: '/exercise/ownership', label: 'Exercise' },
+  { to: '/result/latest', label: 'Result' },
   { to: '/progress', label: 'Progress' },
   { to: '/login', label: 'Login' },
 ]

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { CodeEditor } from '../components/CodeEditor'
 
 const starterCode = `fn main() {
@@ -16,7 +17,12 @@ export function ExercisePage() {
         <p>Update the code so ownership is preserved and tests can pass.</p>
       </section>
       <CodeEditor code={code} onChange={setCode} />
-      <button type="button">Run tests</button>
+      <div className="actions">
+        <button type="button">Run tests</button>
+        <Link className="inline-link" to="/result/latest">
+          View latest result
+        </Link>
+      </div>
     </>
   )
 }

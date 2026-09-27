@@ -8,7 +8,9 @@ import './index.css'
 
 const queryClient = new QueryClient()
 
-registerSW({ immediate: true })
+if (import.meta.env.PROD) {
+  registerSW({ immediate: false })
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

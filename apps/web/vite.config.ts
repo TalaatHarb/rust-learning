@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['vite.svg'],
+      includeAssets: ['favicon.svg'],
       manifest: {
         name: 'Rust Learning Platform',
         short_name: 'Rust Learning',
@@ -18,7 +18,7 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/vite.svg',
+            src: '/favicon.svg',
             sizes: 'any',
             type: 'image/svg+xml',
           },

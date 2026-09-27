@@ -72,7 +72,14 @@ body {
   overflow-x: auto;
 }
 
-button {
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+button,
+.inline-link {
   cursor: pointer;
   width: fit-content;
   border: 1px solid #334155;
@@ -80,6 +87,7 @@ button {
   padding: 0.5rem 0.75rem;
   background: transparent;
   color: inherit;
+  text-decoration: none;
 }
 
 @media (max-width: 900px) {

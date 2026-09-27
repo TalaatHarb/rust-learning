@@ -1,32 +1,21 @@
-# React + TypeScript + Vite
+# Web App (`apps/web`)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React + TypeScript + Vite Progressive Web App for the Rust Learning Platform.
 
-Currently, two official plugins are available:
+## Scripts
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- `npm run dev` — start local dev server.
+- `npm run build` — type-check and build production assets.
+- `npm run lint` — run JavaScript/TypeScript lint checks.
+- `npm run preview` — preview built assets.
 
-## React Compiler
+## Current scope
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- responsive app shell with desktop/mobile-friendly navigation
+- route placeholders for login, dashboard, roadmap, learning unit, exercise, result, and progress
+- reusable Monaco-powered code editor component and read-only code block usage
+- PWA registration and web app manifest
 
-## Expanding the Oxlint configuration
+## Environment
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Use `VITE_API_BASE_URL` to point the frontend at the API base URL.
