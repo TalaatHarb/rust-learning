@@ -1,17 +1,62 @@
+mod auth;
 mod config;
+mod db;
+mod error;
+mod executor_client;
 mod routes;
 
+use std::sync::Arc;
+
 use anyhow::Context;
+use auth::Authenticator;
 use axum::Router;
+use config::Config;
+use reqwest::Client;
+use sqlx::PgPool;
 use tokio::{net::TcpListener, signal};
 use tracing::{info, warn};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
+
+#[derive(Clone)]
+pub struct AppState {
+    pub db: PgPool,
+    pub auth: Authenticator,
+    pub http_client: Client,
+    pub config: Arc<Config>,
+}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     init_tracing();
 
-    let config = config::Config::from_env();
+    let config = Arc::new(Config::from_env());
+
+    let pool = db::connect(&config.database_url)
+        .await
+        .context("failed to connect to postgres")?;
+    sqlx::migrate!("./apps/api/migrations")
+        .run(&pool)
+        .await
+        .context("failed to run migrations")?;
+
+    let auth = if let Some(secret) = config.jwt_hs256_secret.clone() {
+        Authenticator::hs256(secret, config.jwt_issuer.clone(), config.jwt_audience.clone())
+    } else {
+        Authenticator::jwks(
+            config.jwt_issuer.clone(),
+            config.jwt_audience.clone(),
+            config.jwt_jwks_url.clone(),
+            Client::new(),
+        )
+    };
+
+    let state = AppState {
+        db: pool,
+        auth,
+        http_client: Client::new(),
+        config: Arc::clone(&config),
+    };
+
     let bind_address = config.bind_address();
     let listener = TcpListener::bind(&bind_address)
         .await
@@ -20,7 +65,7 @@ async fn main() -> anyhow::Result<()> {
     info!(address = %bind_address, "starting API server");
 
     let app = Router::new()
-        .merge(routes::router())
+        .merge(routes::router(state))
         .fallback(routes::not_found);
 
     axum::serve(listener, app)

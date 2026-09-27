@@ -1,0 +1,12 @@
+{
+  "id": "exercise.rust.ownership.print-twice.v1",
+  "version": 1,
+  "title": "Print borrowed text twice",
+  "starter_file": "src/lib.rs",
+  "template_path": "content/exercises/ownership/v1/template",
+  "expected_solution_file": "src/lib.solution.rs",
+  "hints": [
+    "Pass references instead of owned `String` values.",
+    "Use `&str` in function parameters when ownership is not needed."
+  ]
+}

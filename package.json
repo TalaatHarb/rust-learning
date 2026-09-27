@@ -8,6 +8,10 @@
     "web:dev": "npm --workspace apps/web run dev",
     "web:build": "npm --workspace apps/web run build",
     "web:lint": "npm --workspace apps/web run lint",
-    "validate": "cargo fmt --all -- --check && cargo check --workspace && cargo clippy --workspace --all-targets --all-features -- -D warnings && cargo test --workspace && npm run web:build"
+    "services:up": "scripts/services-up.sh",
+    "services:down": "scripts/services-down.sh",
+    "dev": "scripts/dev-up.sh",
+    "content:validate": "node scripts/validate-content.mjs",
+    "validate": "npm run content:validate && cargo fmt --all -- --check && cargo check --workspace && cargo clippy --workspace --all-targets --all-features -- -D warnings && cargo test --workspace && npm run web:build"
   }
 }

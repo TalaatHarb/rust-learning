@@ -19,3 +19,4 @@
 - keep vertical-slice increments small and testable.
 - update docs when introducing new services or workflows.
 - run `npm run validate` before committing.
+- keep content IDs stable and versioned (`*.vN`) across roadmap/unit/exercise files.

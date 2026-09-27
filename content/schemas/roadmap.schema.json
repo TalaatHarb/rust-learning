@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "roadmap.schema.json",
+  "type": "object",
+  "required": ["id", "title", "modules"],
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "unit_ids"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "unit_ids": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}
