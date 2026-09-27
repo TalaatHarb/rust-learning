@@ -9,11 +9,16 @@
 - [x] Updated API unit endpoint to load unit/exercise content by slug.
 - [x] Extended executor exercise mapping for Variables and Functions.
 - [x] Expanded content validation across all roadmap-referenced units/exercises.
+- [x] Added learning units and exercises for Control Flow, Borrowing, References, and Slices.
+- [x] Added a foundations roadmap API endpoint and switched the roadmap page to server-driven content.
+- [x] Expanded progress APIs/views to show per-unit status and resume the next incomplete unit.
+- [x] Added multi-unit API integration coverage for submissions and progress updates.
+- [x] Extended content validation for missing roadmap-linked references and prerequisite cycles.
 
 ## Next planned tasks
 
-- [ ] **Curriculum expansion:** add the next four fundamentals units and exercises — Control Flow, Borrowing, References, and Slices — so the current foundations roadmap goes beyond Variables, Functions, and Ownership.
-- [ ] **Roadmap API slice:** add a roadmap/content endpoint that returns module and unit metadata from `content/roadmaps/foundations.json` for the web app instead of maintaining planned units inline in the UI.
-- [ ] **Progress tracking follow-up:** expand dashboard and progress views to show per-unit status across all implemented units, plus resume-learning behavior based on the next incomplete unit.
-- [ ] **Integration coverage:** add end-to-end API/executor tests that submit solutions for multiple units and verify attempt persistence plus progress transitions.
-- [ ] **Content graph validation:** extend `npm run content:validate` to detect missing references and prerequisite dependency cycles across all roadmap-linked units before adding more curriculum content.
+- [ ] **MVP completion pass:** verify the full login → roadmap → unit → exercise → result → progress flow against the checklist in `docs/mvp-done-checklist.md`.
+- [ ] **Progress lifecycle polish:** record `STARTED` progress when a submission is queued/running so dashboard state changes immediately.
+- [ ] **Result UX follow-up:** link unit and progress views directly to each unit's latest attempt/result details.
+- [ ] **Auth coverage:** add integration tests that exercise roadmap/progress endpoints with authenticated learner roles alongside the existing submission tests.
+- [ ] **Next curriculum slice:** add the next Rust fundamentals after Slices (Types, Pattern Matching, and Modules) once the MVP loop is fully checked off.
