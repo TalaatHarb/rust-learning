@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useAuth } from 'react-oidc-context'
 import { useQuery } from '@tanstack/react-query'
 import { fetchProgress } from '../lib/api'
@@ -11,6 +12,11 @@ export function DashboardPage() {
     enabled: auth.isAuthenticated,
   })
 
+  const completedUnits =
+    progress.data?.units.filter((unit) => unit.status === 'PASSED' || unit.status === 'MASTERED').length ??
+    0
+  const totalUnits = progress.data?.units.length ?? 0
+
   return (
     <section className="panel">
       <h2>Dashboard</h2>
@@ -20,9 +26,22 @@ export function DashboardPage() {
       {auth.isAuthenticated && progress.isLoading && <p>Loading progress...</p>}
       {auth.isAuthenticated && progress.data && (
         <>
-          <p>Resume unit: {progress.data.unit_id}</p>
-          <p>Status: {progress.data.status}</p>
-          <p>Latest attempt: {progress.data.latest_attempt_id ?? 'No attempts yet'}</p>
+          <p>
+            Resume unit:{' '}
+            <Link className="inline-link" to={`/unit/${progress.data.resume_unit_slug}`}>
+              {progress.data.resume_unit_title}
+            </Link>
+          </p>
+          <p>
+            Completed units: {completedUnits} / {totalUnits}
+          </p>
+          <ul>
+            {progress.data.units.map((unit) => (
+              <li key={unit.unit_id}>
+                {unit.unit_title}: {unit.status}
+              </li>
+            ))}
+          </ul>
         </>
       )}
       {auth.isAuthenticated && progress.isError && (

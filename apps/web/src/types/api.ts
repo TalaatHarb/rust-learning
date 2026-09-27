@@ -22,6 +22,26 @@ export type SubmissionResponse = {
   status: string
 }
 
+export type RoadmapUnitResponse = {
+  id: string
+  slug: string
+  title: string
+  prerequisite_unit_ids: string[]
+  exercise_id: string
+}
+
+export type RoadmapModuleResponse = {
+  id: string
+  title: string
+  units: RoadmapUnitResponse[]
+}
+
+export type RoadmapResponse = {
+  id: string
+  title: string
+  modules: RoadmapModuleResponse[]
+}
+
 export type AttemptResponse = {
   attempt_id: string
   exercise_id: string
@@ -31,9 +51,18 @@ export type AttemptResponse = {
   duration_ms: number | null
 }
 
-export type ProgressOverviewResponse = {
+export type ProgressUnitResponse = {
   unit_id: string
+  unit_slug: string
+  unit_title: string
   status: string
   completed_attempts: number
   latest_attempt_id: string | null
+}
+
+export type ProgressOverviewResponse = {
+  resume_unit_id: string
+  resume_unit_slug: string
+  resume_unit_title: string
+  units: ProgressUnitResponse[]
 }

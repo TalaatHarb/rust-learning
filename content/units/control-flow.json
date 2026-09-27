@@ -1,0 +1,34 @@
+{
+  "id": "unit.rust.control-flow.v1",
+  "version": 1,
+  "title": "Rust Control Flow",
+  "learning_objectives": [
+    "Use `if` and `else` expressions to branch on conditions.",
+    "Return values from control-flow expressions.",
+    "Read branch-related type mismatch compiler errors."
+  ],
+  "prerequisite_unit_ids": [
+    "unit.rust.functions.v1"
+  ],
+  "explanation": "Rust control flow uses expressions, so `if` branches can produce values as long as every branch returns the same type.",
+  "examples": [
+    {
+      "id": "example.if-expression",
+      "title": "Choosing a label",
+      "code": "fn describe(score: i32) -> &'static str {\n    if score >= 50 {\n        \"pass\"\n    } else {\n        \"retry\"\n    }\n}"
+    },
+    {
+      "id": "example.match-expression",
+      "title": "Simple match",
+      "code": "fn describe_day(day: u8) -> &'static str {\n    match day {\n        0 | 6 => \"weekend\",\n        _ => \"weekday\",\n    }\n}"
+    }
+  ],
+  "compiler_error_examples": [
+    "error[E0308]: `if` and `else` have incompatible types"
+  ],
+  "exercise_id": "exercise.rust.control-flow.classify-number.v1",
+  "completion_criteria": [
+    "Exercise tests pass",
+    "Learner can explain why both branches must return the same type"
+  ]
+}

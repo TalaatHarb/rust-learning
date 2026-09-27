@@ -11,9 +11,6 @@ import { RoadmapPage } from './pages/RoadmapPage'
 const navItems = [
   { to: '/', label: 'Dashboard' },
   { to: '/roadmap', label: 'Roadmap' },
-  { to: '/unit/variables', label: 'Variables Unit' },
-  { to: '/unit/functions', label: 'Functions Unit' },
-  { to: '/unit/ownership', label: 'Ownership Unit' },
   { to: '/result/latest', label: 'Result' },
   { to: '/progress', label: 'Progress' },
   { to: '/login', label: 'Login' },

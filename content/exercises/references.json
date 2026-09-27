@@ -1,0 +1,12 @@
+{
+  "id": "exercise.rust.references.append-rust.v1",
+  "version": 1,
+  "title": "Append Rust through a mutable reference",
+  "starter_file": "src/lib.rs",
+  "template_path": "content/exercises/references/v1/template",
+  "expected_solution_file": "src/lib.solution.rs",
+  "hints": [
+    "The function should mutate the provided `String` in place.",
+    "Use `push_str` with a mutable reference parameter."
+  ]
+}

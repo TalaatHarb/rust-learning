@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useAuth } from 'react-oidc-context'
 import { useQuery } from '@tanstack/react-query'
 import { fetchProgress } from '../lib/api'
@@ -41,10 +42,24 @@ export function ProgressPage() {
   return (
     <section className="panel">
       <h2>User Progress</h2>
-      <p>Current unit: {progress.data.unit_id}</p>
-      <p>Status: {progress.data.status}</p>
-      <p>Completed attempts: {progress.data.completed_attempts}</p>
-      <p>Latest attempt: {progress.data.latest_attempt_id ?? 'N/A'}</p>
+      <p>
+        Resume next with{' '}
+        <Link className="inline-link" to={`/unit/${progress.data.resume_unit_slug}`}>
+          {progress.data.resume_unit_title}
+        </Link>
+        .
+      </p>
+      <ul>
+        {progress.data.units.map((unit) => (
+          <li key={unit.unit_id}>
+            <Link className="inline-link" to={`/unit/${unit.unit_slug}`}>
+              {unit.unit_title}
+            </Link>{' '}
+            — {unit.status} — completed attempts: {unit.completed_attempts} — latest attempt:{' '}
+            {unit.latest_attempt_id ?? 'N/A'}
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }
