@@ -11,14 +11,14 @@ Reduce risk from untrusted learner code execution while preserving useful feedba
 - Process count limited (`pids_limit`).
 - Memory limit configured (`mem_limit`).
 - Read-only root filesystem + tmpfs scratch space.
-- Execution timeout enforced for `cargo check` and `cargo test`.
-- Output-size truncation to prevent oversized response payloads.
+- Execution timeout enforced for `cargo check` and `cargo test`, including termination of the command process group.
+- Stdout and stderr are drained while retaining at most the configured number of bytes per stream.
 
 ## Known limitations
 
 - Strong syscall filtering and namespace isolation are not yet enforced.
 - CPU quotas and disk quotas need explicit runtime policy coverage in production deployment.
-- Timeout currently wraps command execution but does not yet guarantee process-tree kill semantics for all cases.
+- A process can escape its process group; container resource limits remain an additional containment layer, not a substitute for stronger isolation.
 
 ## Next hardening steps
 

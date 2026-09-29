@@ -7,7 +7,7 @@ export function DashboardPage() {
   const auth = useAuth()
 
   const progress = useQuery({
-    queryKey: ['progress', 'dashboard'],
+    queryKey: ['progress', 'overview'],
     queryFn: () => fetchProgress(auth.user!.access_token),
     enabled: auth.isAuthenticated,
   })
@@ -39,6 +39,14 @@ export function DashboardPage() {
             {progress.data.units.map((unit) => (
               <li key={unit.unit_id}>
                 {unit.unit_title}: {unit.status}
+                {unit.latest_attempt_id && (
+                  <>
+                    {' — '}
+                    <Link className="inline-link" to={`/result/${unit.latest_attempt_id}`}>
+                      View latest result
+                    </Link>
+                  </>
+                )}
               </li>
             ))}
           </ul>

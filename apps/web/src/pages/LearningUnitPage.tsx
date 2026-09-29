@@ -1,16 +1,24 @@
 import { Link, useParams } from 'react-router-dom'
+import { useAuth } from 'react-oidc-context'
 import { useQuery } from '@tanstack/react-query'
 import { CodeBlock } from '../components/CodeBlock'
 import { CodeEditor } from '../components/CodeEditor'
-import { fetchUnit } from '../lib/api'
+import { fetchProgress, fetchUnit } from '../lib/api'
 
 export function LearningUnitPage() {
   const { unitId = 'ownership' } = useParams()
+  const auth = useAuth()
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['unit', unitId],
     queryFn: () => fetchUnit(unitId),
   })
+  const progress = useQuery({
+    queryKey: ['progress', 'overview'],
+    queryFn: () => fetchProgress(auth.user!.access_token),
+    enabled: auth.isAuthenticated,
+  })
+  const latestAttemptId = progress.data?.units.find((unit) => unit.unit_slug === unitId)?.latest_attempt_id
 
   if (isLoading) {
     return (
@@ -34,6 +42,13 @@ export function LearningUnitPage() {
     <>
       <section className="panel">
         <h2>{data.title}</h2>
+        {latestAttemptId && (
+          <p>
+            <Link className="inline-link" to={`/result/${latestAttemptId}`}>
+              View latest exercise result
+            </Link>
+          </p>
+        )}
         <p>{data.explanation}</p>
         <h3>Learning objectives</h3>
         <ul>

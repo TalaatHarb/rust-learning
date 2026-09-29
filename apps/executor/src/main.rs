@@ -1,5 +1,5 @@
 use std::{
-    env,
+    env, io,
     path::{Path, PathBuf},
     process::Stdio,
     time::{Duration, Instant},
@@ -13,7 +13,11 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use tempfile::Builder;
-use tokio::{net::TcpListener, process::Command};
+use tokio::{
+    io::{AsyncRead, AsyncReadExt},
+    net::TcpListener,
+    process::{Child, Command},
+};
 use tracing::{error, info};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 use uuid::Uuid;
@@ -271,31 +275,114 @@ async fn run_command(
         .args(args)
         .current_dir(cwd)
         .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
+        .stderr(Stdio::piped())
+        .kill_on_drop(true);
+    #[cfg(unix)]
+    command.process_group(0);
 
-    let output = tokio::time::timeout(timeout, command.output()).await;
+    let mut child = command.spawn()?;
+    let process_id = child.id();
+    let stdout = child
+        .stdout
+        .take()
+        .context("failed to capture command stdout")?;
+    let stderr = child
+        .stderr
+        .take()
+        .context("failed to capture command stderr")?;
+    let mut stdout_task = tokio::spawn(read_limited(stdout, output_limit));
+    let mut stderr_task = tokio::spawn(read_limited(stderr, output_limit));
 
-    match output {
-        Ok(Ok(output)) => Ok(CommandResult {
-            success: output.status.success(),
-            timed_out: false,
-            stdout: truncate_output(
-                String::from_utf8_lossy(&output.stdout).to_string(),
-                output_limit,
-            ),
-            stderr: truncate_output(
-                String::from_utf8_lossy(&output.stderr).to_string(),
-                output_limit,
-            ),
-        }),
-        Ok(Err(error)) => Err(error.into()),
-        Err(_) => Ok(CommandResult {
-            success: false,
-            timed_out: true,
-            stdout: String::new(),
-            stderr: format!("command timed out after {}s", timeout.as_secs()),
-        }),
+    let command_result = tokio::time::timeout(timeout, async {
+        let status = child.wait().await?;
+        let stdout = (&mut stdout_task)
+            .await
+            .context("failed to read command stdout")??;
+        let stderr = (&mut stderr_task)
+            .await
+            .context("failed to read command stderr")??;
+        Ok::<_, anyhow::Error>((status.success(), stdout, stderr))
+    })
+    .await;
+
+    match command_result {
+        Ok(result) => {
+            let (success, stdout, stderr) = result?;
+            Ok(CommandResult {
+                success,
+                timed_out: false,
+                stdout,
+                stderr,
+            })
+        }
+        Err(_) => {
+            terminate_process_group(process_id, &mut child).await?;
+            child.wait().await?;
+            let stdout = stdout_task
+                .await
+                .context("failed to read command stdout")??;
+            let stderr = stderr_task
+                .await
+                .context("failed to read command stderr")??;
+            Ok(CommandResult {
+                success: false,
+                timed_out: true,
+                stdout,
+                stderr,
+            })
+        }
     }
+}
+
+async fn read_limited(
+    mut reader: impl AsyncRead + Unpin,
+    output_limit: usize,
+) -> io::Result<String> {
+    let mut output = Vec::with_capacity(output_limit.min(8192));
+    let mut buffer = [0; 8192];
+    let mut truncated = false;
+
+    loop {
+        let bytes_read = reader.read(&mut buffer).await?;
+        if bytes_read == 0 {
+            break;
+        }
+
+        let bytes_to_keep = output_limit.saturating_sub(output.len()).min(bytes_read);
+        output.extend_from_slice(&buffer[..bytes_to_keep]);
+        truncated |= bytes_to_keep < bytes_read;
+    }
+
+    let mut output = String::from_utf8_lossy(&output).to_string();
+    if truncated {
+        output.push_str("\n...[truncated]");
+    }
+
+    Ok(output)
+}
+
+async fn terminate_process_group(process_id: Option<u32>, child: &mut Child) -> anyhow::Result<()> {
+    #[cfg(unix)]
+    let _ = child;
+    #[cfg(unix)]
+    {
+        let Some(pid) = process_id else {
+            return Ok(());
+        };
+        let process_group = i32::try_from(pid).context("process id exceeds supported range")?;
+        let result = unsafe { libc::kill(-process_group, libc::SIGKILL) };
+        if result == -1 {
+            let error = io::Error::last_os_error();
+            if error.kind() != io::ErrorKind::NotFound {
+                return Err(error.into());
+            }
+        }
+    }
+
+    #[cfg(not(unix))]
+    child.kill().await?;
+
+    Ok(())
 }
 
 fn truncate_output(value: String, max: usize) -> String {
@@ -307,4 +394,49 @@ fn truncate_output(value: String, max: usize) -> String {
     output.truncate(max);
     output.push_str("\n...[truncated]");
     output
+}
+
+#[cfg(all(test, unix))]
+mod tests {
+    use super::run_command;
+    use std::time::Duration;
+
+    #[tokio::test]
+    async fn command_output_is_bounded() {
+        let workdir = tempfile::tempdir().expect("temporary working directory");
+        let result = run_command(
+            "sh",
+            &["-c", "printf '%2048s' ''"],
+            workdir.path(),
+            Duration::from_secs(2),
+            32,
+        )
+        .await
+        .expect("command ran");
+
+        assert!(result.success);
+        assert!(result.stdout.starts_with(&" ".repeat(32)));
+        assert!(result.stdout.ends_with("\n...[truncated]"));
+        assert!(result.stdout.len() <= 32 + "\n...[truncated]".len());
+    }
+
+    #[tokio::test]
+    async fn command_timeout_kills_descendants_in_its_process_group() {
+        let workdir = tempfile::tempdir().expect("temporary working directory");
+        let result = tokio::time::timeout(
+            Duration::from_secs(2),
+            run_command(
+                "sh",
+                &["-c", "sleep 10 &"],
+                workdir.path(),
+                Duration::from_millis(50),
+                32,
+            ),
+        )
+        .await
+        .expect("timed-out command process group was terminated")
+        .expect("command result");
+
+        assert!(result.timed_out);
+    }
 }

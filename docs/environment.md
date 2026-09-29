@@ -14,6 +14,10 @@ The platform uses environment variables with safe defaults for local development
 
 - `RUST_LOG` — tracing filter level.
 
+### Testing
+
+- `TEST_DATABASE_URL` — PostgreSQL connection URL used by API integration tests. Set it to a reachable test database when running `npm run validate`; CI provides a PostgreSQL service.
+
 ### API
 
 - `API_HOST` — API bind host (default `0.0.0.0`).

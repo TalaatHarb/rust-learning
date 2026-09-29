@@ -702,11 +702,7 @@ async fn update_progress(state: &AppState, attempt_id: Uuid) -> anyhow::Result<(
     let exercise_id: String = row.get(2);
     let unit_id = load_unit_id_for_exercise(&exercise_id).await?;
 
-    let progress_status = match attempt_status.as_str() {
-        "PASSED" => "PASSED",
-        "RUNNING" | "QUEUED" => "STARTED",
-        _ => "ATTEMPTED",
-    };
+    let progress_status = progress_status_for_attempt(&attempt_status);
 
     sqlx::query(
         r#"
@@ -789,6 +785,14 @@ fn ensure_role(user: &AuthenticatedUser, allowed_roles: &[&str]) -> AppResult<()
     ))
 }
 
+fn progress_status_for_attempt(attempt_status: &str) -> &'static str {
+    match attempt_status {
+        "PASSED" => "PASSED",
+        "RUNNING" | "QUEUED" => "STARTED",
+        _ => "ATTEMPTED",
+    }
+}
+
 pub async fn not_found() -> Response {
     (
         StatusCode::NOT_FOUND,
@@ -824,7 +828,8 @@ mod tests {
     use crate::{AppState, auth::Authenticator, config::Config};
 
     use super::{
-        AttemptResponse, ProgressOverviewResponse, RoadmapResponse, SubmissionResponse, router,
+        AttemptResponse, ProgressOverviewResponse, RoadmapResponse, SubmissionResponse,
+        progress_status_for_attempt, router,
     };
 
     #[derive(Serialize)]
@@ -876,6 +881,14 @@ mod tests {
             ),
             "exercise.rust.control-flow.classify-number.v1" => (
                 if payload.code.contains("else if value < 0") && payload.code.contains("\"zero\"") {
+                    "PASSED"
+                } else {
+                    "FAILED"
+                },
+                String::new(),
+            ),
+            "exercise.rust.ownership.print-twice.v1" => (
+                if payload.code.contains("message.as_str()") {
                     "PASSED"
                 } else {
                     "FAILED"
@@ -977,6 +990,41 @@ mod tests {
         panic!("attempt did not finish in time");
     }
 
+    async fn wait_for_unit_progress(
+        app: &Router,
+        token: &str,
+        unit_slug: &str,
+        attempt_id: Uuid,
+        expected_status: &str,
+    ) -> ProgressOverviewResponse {
+        for _ in 0..40 {
+            let response = app
+                .clone()
+                .oneshot(
+                    Request::builder()
+                        .uri("/api/v1/progress/overview")
+                        .header(AUTHORIZATION, bearer_header(token))
+                        .body(Body::empty())
+                        .expect("valid request"),
+                )
+                .await
+                .expect("request handled");
+
+            let progress: ProgressOverviewResponse = response_json(response).await;
+            if progress.units.iter().any(|unit| {
+                unit.unit_slug == unit_slug
+                    && unit.status == expected_status
+                    && unit.latest_attempt_id == Some(attempt_id)
+            }) {
+                return progress;
+            }
+
+            sleep(Duration::from_millis(50)).await;
+        }
+
+        panic!("unit progress did not reach {expected_status} for attempt {attempt_id}");
+    }
+
     #[tokio::test]
     async fn health_endpoint_is_available() {
         let Some(state) = test_state().await else {
@@ -1074,6 +1122,102 @@ mod tests {
                 "slices"
             ]
         );
+    }
+
+    #[tokio::test]
+    async fn learner_role_can_read_roadmap_and_progress() {
+        let Some(state) = test_state().await else {
+            return;
+        };
+
+        let app = router(state);
+        let token = test_token("secret", "test-user-roadmap-auth", &["LEARNER"]);
+
+        let roadmap_response = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri("/api/v1/roadmaps/foundations")
+                    .header(AUTHORIZATION, bearer_header(&token))
+                    .body(Body::empty())
+                    .expect("valid request"),
+            )
+            .await
+            .expect("request handled");
+        assert_eq!(roadmap_response.status(), StatusCode::OK);
+
+        let progress_response = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri("/api/v1/progress/overview")
+                    .header(AUTHORIZATION, bearer_header(&token))
+                    .body(Body::empty())
+                    .expect("valid request"),
+            )
+            .await
+            .expect("request handled");
+        assert_eq!(progress_response.status(), StatusCode::OK);
+
+        let token_without_learner_role = test_token("secret", "test-user-progress-denied", &[]);
+        let denied_response = app
+            .oneshot(
+                Request::builder()
+                    .uri("/api/v1/progress/overview")
+                    .header(AUTHORIZATION, bearer_header(&token_without_learner_role))
+                    .body(Body::empty())
+                    .expect("valid request"),
+            )
+            .await
+            .expect("request handled");
+        assert_eq!(denied_response.status(), StatusCode::FORBIDDEN);
+    }
+
+    #[tokio::test]
+    async fn ownership_submission_returns_execution_result_and_updates_progress() {
+        let Some(state) = test_state().await else {
+            return;
+        };
+
+        let app = router(state);
+        let token = test_token("secret", "test-user-ownership", &["LEARNER"]);
+        let submission_response = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method("POST")
+                    .uri("/api/v1/attempts/submissions")
+                    .header(AUTHORIZATION, bearer_header(&token))
+                    .header(CONTENT_TYPE, "application/json")
+                    .body(Body::from(
+                        serde_json::json!({
+                            "exercise_id": "exercise.rust.ownership.print-twice.v1",
+                            "code": "pub fn print_twice(message: String) -> (String, String) { let borrowed = message.as_str(); (borrowed.to_string(), borrowed.to_string()) }"
+                        })
+                        .to_string(),
+                    ))
+                    .expect("valid request"),
+            )
+            .await
+            .expect("request handled");
+
+        assert_eq!(submission_response.status(), StatusCode::OK);
+        let submission: SubmissionResponse = response_json(submission_response).await;
+        assert_eq!(submission.status, "QUEUED");
+
+        let attempt = wait_for_attempt(&app, &token, submission.attempt_id).await;
+        assert_eq!(attempt.status, "PASSED");
+
+        let progress =
+            wait_for_unit_progress(&app, &token, "ownership", submission.attempt_id, "PASSED")
+                .await;
+        let ownership = progress
+            .units
+            .iter()
+            .find(|unit| unit.unit_slug == "ownership")
+            .expect("ownership progress");
+        assert_eq!(ownership.status, "PASSED");
+        assert_eq!(ownership.latest_attempt_id, Some(submission.attempt_id));
     }
 
     #[tokio::test]
@@ -1235,5 +1379,15 @@ mod tests {
 
         assert_ne!(variables_status, Some("NOT_STARTED"));
         assert!(variables_status.is_some());
+    }
+
+    #[test]
+    fn progress_status_tracks_attempt_lifecycle() {
+        assert_eq!(progress_status_for_attempt("QUEUED"), "STARTED");
+        assert_eq!(progress_status_for_attempt("RUNNING"), "STARTED");
+        assert_eq!(progress_status_for_attempt("PASSED"), "PASSED");
+        assert_eq!(progress_status_for_attempt("FAILED"), "ATTEMPTED");
+        assert_eq!(progress_status_for_attempt("TIMEOUT"), "ATTEMPTED");
+        assert_eq!(progress_status_for_attempt("ERROR"), "ATTEMPTED");
     }
 }
