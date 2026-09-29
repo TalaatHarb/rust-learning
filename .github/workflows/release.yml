@@ -99,6 +99,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Compute lowercase image repository
+        id: image
+        run: echo "repository=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -106,8 +110,8 @@ jobs:
           file: apps/executor/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/executor:${{ github.ref_name }}
-            ghcr.io/${{ github.repository }}/executor:latest
+            ghcr.io/${{ steps.image.outputs.repository }}/executor:${{ github.ref_name }}
+            ghcr.io/${{ steps.image.outputs.repository }}/executor:latest
 
   release:
     name: Publish GitHub release
