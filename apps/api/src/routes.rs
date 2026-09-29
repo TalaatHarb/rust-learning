@@ -828,7 +828,8 @@ mod tests {
     use crate::{AppState, auth::Authenticator, config::Config};
 
     use super::{
-        AttemptResponse, ProgressOverviewResponse, RoadmapResponse, SubmissionResponse, router,
+        AttemptResponse, ProgressOverviewResponse, RoadmapResponse, SubmissionResponse,
+        progress_status_for_attempt, router,
     };
 
     #[derive(Serialize)]
