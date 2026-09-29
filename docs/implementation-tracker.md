@@ -27,4 +27,4 @@
 
 ## Next planned tasks
 
-- [ ] **Next curriculum slice:** add the next Rust fundamentals after Slices (Types, Pattern Matching, and Modules) after the MVP checklist is fully verified.
+- [ ] Implement the next Rust Foundations curriculum sequence after Slices: [Types, Pattern Matching, and Modules](next-learning-slices.md). Complete each slice end to end and verify the MVP checklist before marking the sequence done.
