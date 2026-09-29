@@ -12,7 +12,10 @@
         "unit.rust.ownership.v1",
         "unit.rust.borrowing.v1",
         "unit.rust.references.v1",
-        "unit.rust.slices.v1"
+        "unit.rust.slices.v1",
+        "unit.rust.types.v1",
+        "unit.rust.pattern-matching.v1",
+        "unit.rust.modules.v1"
       ]
     }
   ]

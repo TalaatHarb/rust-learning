@@ -229,6 +229,15 @@ fn map_template_path(exercise_id: &str) -> anyhow::Result<&'static Path> {
         "exercise.rust.slices.first-word.v1" => {
             Ok(Path::new("content/exercises/slices/v1/template"))
         }
+        "exercise.rust.types.tuple-basics.v1" => {
+            Ok(Path::new("content/exercises/types/v1/template"))
+        }
+        "exercise.rust.pattern-matching.classify-value.v1" => {
+            Ok(Path::new("content/exercises/pattern-matching/v1/template"))
+        }
+        "exercise.rust.modules.public-api.v1" => {
+            Ok(Path::new("content/exercises/modules/v1/template"))
+        }
         _ => anyhow::bail!("unsupported exercise_id: {exercise_id}"),
     }
 }
