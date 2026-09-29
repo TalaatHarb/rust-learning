@@ -1,0 +1,13 @@
+{
+  "id": "exercise.rust.modules.public-api.v1",
+  "version": 1,
+  "title": "Build a public word-count API",
+  "starter_file": "src/lib.rs",
+  "template_path": "content/exercises/modules/v1/template",
+  "expected_solution_file": "src/lib.solution.rs",
+  "hints": [
+    "Keep `count_words` private inside the `text_tools` module.",
+    "Expose `word_count` with `pub` and implement it using the private helper.",
+    "Import `word_count` with `use crate::text_tools::word_count` and use it in `word_summary`."
+  ]
+}

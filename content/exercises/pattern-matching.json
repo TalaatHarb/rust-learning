@@ -1,0 +1,13 @@
+{
+  "id": "exercise.rust.pattern-matching.classify-value.v1",
+  "version": 1,
+  "title": "Describe every signal variant",
+  "starter_file": "src/lib.rs",
+  "template_path": "content/exercises/pattern-matching/v1/template",
+  "expected_solution_file": "src/lib.solution.rs",
+  "hints": [
+    "Match on each of the three `Signal` variants so the compiler can verify exhaustiveness.",
+    "Destructure `x` and `y` from `Move`, and bind the string inside `Write`.",
+    "Use `format!` to include the values carried by each data-bearing variant."
+  ]
+}

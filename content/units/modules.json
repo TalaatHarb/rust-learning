@@ -1,0 +1,41 @@
+{
+  "id": "unit.rust.modules.v1",
+  "version": 1,
+  "title": "Rust Modules",
+  "learning_objectives": [
+    "Group related items in inline modules and navigate their paths.",
+    "Use visibility modifiers to expose a supported public API while keeping helpers private.",
+    "Bring public items into scope with `use` and diagnose visibility or path errors."
+  ],
+  "prerequisite_unit_ids": [
+    "unit.rust.pattern-matching.v1"
+  ],
+  "explanation": "Modules organize a crate into namespaces. Paths identify items, `use` brings a path into scope, and `pub` controls which items outside a module can access. Private helpers can support a small public API without becoming part of that API.",
+  "examples": [
+    {
+      "id": "example.inline-module",
+      "title": "Expose a public function",
+      "code": "pub mod text_tools {\n    fn count_words(text: &str) -> usize {\n        text.split_whitespace().count()\n    }\n\n    pub fn word_count(text: &str) -> usize {\n        count_words(text)\n    }\n}"
+    },
+    {
+      "id": "example.module-path",
+      "title": "Use a module path",
+      "code": "let count = crate::text_tools::word_count(\"hello Rust\");"
+    },
+    {
+      "id": "example.import-item",
+      "title": "Bring an item into scope",
+      "code": "use crate::text_tools::word_count;\n\nlet count = word_count(\"hello Rust\");"
+    }
+  ],
+  "compiler_error_examples": [
+    "error[E0603]: function `count_words` is private",
+    "error[E0432]: unresolved import"
+  ],
+  "exercise_id": "exercise.rust.modules.public-api.v1",
+  "completion_criteria": [
+    "Exercise tests pass through the public API without accessing its private helper",
+    "Learner can distinguish the helper's definition path from the exported function's access path",
+    "Learner can explain why the helper remains private while the API is public"
+  ]
+}

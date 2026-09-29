@@ -1,0 +1,13 @@
+{
+  "id": "exercise.rust.types.tuple-basics.v1",
+  "version": 1,
+  "title": "Summarize a typed reading",
+  "starter_file": "src/lib.rs",
+  "template_path": "content/exercises/types/v1/template",
+  "expected_solution_file": "src/lib.solution.rs",
+  "hints": [
+    "Destructure the `(u8, bool)` tuple into its two named values.",
+    "Use `samples.iter()` to visit all three array entries.",
+    "Convert each `i16` sample to `i32` before summing, and return the tuple fields with the total."
+  ]
+}
