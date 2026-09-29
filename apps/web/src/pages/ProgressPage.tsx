@@ -56,7 +56,13 @@ export function ProgressPage() {
               {unit.unit_title}
             </Link>{' '}
             — {unit.status} — completed attempts: {unit.completed_attempts} — latest attempt:{' '}
-            {unit.latest_attempt_id ?? 'N/A'}
+            {unit.latest_attempt_id ? (
+              <Link className="inline-link" to={`/result/${unit.latest_attempt_id}`}>
+                View result
+              </Link>
+            ) : (
+              'N/A'
+            )}
           </li>
         ))}
       </ul>
