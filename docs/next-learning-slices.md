@@ -13,9 +13,9 @@ This plan sequences the next three Rust Foundations units after **Slices**. Each
 
 ## 1. Types
 
-**Slug:** `types`  
-**Prerequisite:** `unit.rust.slices.v1`  
-**Content IDs:** `unit.rust.types.v1`; `exercise.rust.types.tuple-basics.v1`
+- **Slug:** `types`
+- **Prerequisite:** `unit.rust.slices.v1`
+- **Content IDs:** `unit.rust.types.v1`; `exercise.rust.types.tuple-basics.v1`
 
 ### Learning outcomes
 
@@ -37,9 +37,9 @@ The exercise should construct a small typed record from a tuple and fixed-size a
 
 ## 2. Pattern Matching
 
-**Slug:** `pattern-matching`  
-**Prerequisite:** `unit.rust.types.v1`  
-**Content IDs:** `unit.rust.pattern-matching.v1`; `exercise.rust.pattern-matching.classify-value.v1`
+- **Slug:** `pattern-matching`
+- **Prerequisite:** `unit.rust.types.v1`
+- **Content IDs:** `unit.rust.pattern-matching.v1`; `exercise.rust.pattern-matching.classify-value.v1`
 
 ### Learning outcomes
 
@@ -62,9 +62,9 @@ The exercise should classify a domain value represented by an enum, including at
 
 ## 3. Modules
 
-**Slug:** `modules`  
-**Prerequisite:** `unit.rust.pattern-matching.v1`  
-**Content IDs:** `unit.rust.modules.v1`; `exercise.rust.modules.public-api.v1`
+- **Slug:** `modules`
+- **Prerequisite:** `unit.rust.pattern-matching.v1`
+- **Content IDs:** `unit.rust.modules.v1`; `exercise.rust.modules.public-api.v1`
 
 ### Learning outcomes
 
