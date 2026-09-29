@@ -8,7 +8,11 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use sqlx::Row;
-use std::{collections::HashMap, io::ErrorKind};
+use std::{
+    collections::HashMap,
+    io::ErrorKind,
+    path::{Path as FsPath, PathBuf},
+};
 use tracing::{error, info};
 use uuid::Uuid;
 
@@ -493,8 +497,30 @@ async fn unit_by_id(Path(unit_id): Path<String>) -> AppResult<Json<UnitResponse>
     }))
 }
 
+/// Resolves the repository's `content` directory regardless of the process's
+/// current working directory. `cargo run`/production deployments execute
+/// with the workspace root as the working directory, while `cargo test`
+/// executes with the crate's manifest directory as the working directory, so
+/// a plain relative `content/...` path only resolves in one of those cases.
+fn content_root() -> PathBuf {
+    if let Ok(dir) = std::env::var("CONTENT_DIR") {
+        return PathBuf::from(dir);
+    }
+
+    let candidates = [
+        PathBuf::from("content"),
+        FsPath::new(env!("CARGO_MANIFEST_DIR")).join("../../content"),
+    ];
+
+    candidates
+        .into_iter()
+        .find(|candidate| candidate.is_dir())
+        .unwrap_or_else(|| PathBuf::from("content"))
+}
+
 async fn load_foundations_roadmap() -> AppResult<LoadedRoadmap> {
-    let roadmap_data = tokio::fs::read_to_string("content/roadmaps/foundations.json")
+    let roadmap_path = content_root().join("roadmaps/foundations.json");
+    let roadmap_data = tokio::fs::read_to_string(&roadmap_path)
         .await
         .map_err(|error| {
             if error.kind() == ErrorKind::NotFound {
@@ -553,7 +579,7 @@ async fn load_foundations_roadmap() -> AppResult<LoadedRoadmap> {
 }
 
 async fn load_unit_file_by_slug(unit_slug: &str) -> AppResult<UnitFile> {
-    let unit_path = format!("content/units/{unit_slug}.json");
+    let unit_path = content_root().join(format!("units/{unit_slug}.json"));
     let unit_data = tokio::fs::read_to_string(&unit_path)
         .await
         .map_err(|error| {
@@ -578,7 +604,7 @@ async fn load_unit_file_by_slug(unit_slug: &str) -> AppResult<UnitFile> {
 }
 
 async fn load_exercise_file_by_slug(unit_slug: &str) -> AppResult<ExerciseFile> {
-    let exercise_path = format!("content/exercises/{unit_slug}.json");
+    let exercise_path = content_root().join(format!("exercises/{unit_slug}.json"));
     let exercise_data = tokio::fs::read_to_string(&exercise_path)
         .await
         .map_err(|error| {
@@ -705,7 +731,7 @@ async fn update_progress(state: &AppState, attempt_id: Uuid) -> anyhow::Result<(
 }
 
 async fn load_unit_id_for_exercise(exercise_id: &str) -> anyhow::Result<String> {
-    let mut unit_entries = tokio::fs::read_dir("content/units").await?;
+    let mut unit_entries = tokio::fs::read_dir(content_root().join("units")).await?;
 
     while let Some(entry) = unit_entries.next_entry().await? {
         let path = entry.path();
