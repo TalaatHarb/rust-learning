@@ -252,6 +252,10 @@ async fn submit_attempt(
         )
     })?;
 
+    if let Err(error) = update_progress(&state, attempt_id).await {
+        error!(%error, attempt_id = %attempt_id, "failed to record queued progress");
+    }
+
     let state_for_worker = state.clone();
     let exercise_id = payload.exercise_id.clone();
     let code = payload.code.clone();
@@ -612,6 +616,10 @@ async fn process_attempt(
         .bind(attempt_id)
         .execute(&state.db)
         .await?;
+
+    if let Err(error) = update_progress(&state, attempt_id).await {
+        error!(%error, attempt_id = %attempt_id, "failed to record running progress");
+    }
 
     let result = execute_submission(
         &state.http_client,
@@ -1143,5 +1151,63 @@ mod tests {
                 .map(|unit| unit.status.as_str()),
             Some("NOT_STARTED")
         );
+    }
+
+    #[tokio::test]
+    async fn submission_immediately_records_started_progress() {
+        let Some(state) = test_state().await else {
+            return;
+        };
+
+        let app = router(state);
+        let token = test_token("secret", "test-user-started-progress", &["LEARNER"]);
+
+        let submission = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method("POST")
+                    .uri("/api/v1/attempts/submissions")
+                    .header(AUTHORIZATION, bearer_header(&token))
+                    .header(CONTENT_TYPE, "application/json")
+                    .body(Body::from(
+                        serde_json::json!({
+                            "exercise_id": "exercise.rust.variables.mutable-counter.v1",
+                            "code": "pub fn increment_counter() -> i32 { let mut counter = 0; counter += 1; counter }\n#[cfg(test)] mod tests { use super::increment_counter; #[test] fn increments_from_zero_to_one() { assert_eq!(increment_counter(), 1); } }"
+                        })
+                        .to_string(),
+                    ))
+                    .expect("valid request"),
+            )
+            .await
+            .expect("request handled");
+        assert_eq!(submission.status(), StatusCode::OK);
+
+        // The progress row must be recorded before the queued submission
+        // response is returned, so the dashboard reflects a started unit
+        // immediately instead of waiting for the attempt to finish.
+        let progress_response = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri("/api/v1/progress/overview")
+                    .header(AUTHORIZATION, bearer_header(&token))
+                    .body(Body::empty())
+                    .expect("valid request"),
+            )
+            .await
+            .expect("request handled");
+
+        assert_eq!(progress_response.status(), StatusCode::OK);
+        let progress: ProgressOverviewResponse = response_json(progress_response).await;
+
+        let variables_status = progress
+            .units
+            .iter()
+            .find(|unit| unit.unit_slug == "variables")
+            .map(|unit| unit.status.as_str());
+
+        assert_ne!(variables_status, Some("NOT_STARTED"));
+        assert!(variables_status.is_some());
     }
 }
