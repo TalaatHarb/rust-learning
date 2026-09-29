@@ -990,6 +990,41 @@ mod tests {
         panic!("attempt did not finish in time");
     }
 
+    async fn wait_for_unit_progress(
+        app: &Router,
+        token: &str,
+        unit_slug: &str,
+        attempt_id: Uuid,
+        expected_status: &str,
+    ) -> ProgressOverviewResponse {
+        for _ in 0..40 {
+            let response = app
+                .clone()
+                .oneshot(
+                    Request::builder()
+                        .uri("/api/v1/progress/overview")
+                        .header(AUTHORIZATION, bearer_header(token))
+                        .body(Body::empty())
+                        .expect("valid request"),
+                )
+                .await
+                .expect("request handled");
+
+            let progress: ProgressOverviewResponse = response_json(response).await;
+            if progress.units.iter().any(|unit| {
+                unit.unit_slug == unit_slug
+                    && unit.status == expected_status
+                    && unit.latest_attempt_id == Some(attempt_id)
+            }) {
+                return progress;
+            }
+
+            sleep(Duration::from_millis(50)).await;
+        }
+
+        panic!("unit progress did not reach {expected_status} for attempt {attempt_id}");
+    }
+
     #[tokio::test]
     async fn health_endpoint_is_available() {
         let Some(state) = test_state().await else {
@@ -1173,17 +1208,9 @@ mod tests {
         let attempt = wait_for_attempt(&app, &token, submission.attempt_id).await;
         assert_eq!(attempt.status, "PASSED");
 
-        let progress_response = app
-            .oneshot(
-                Request::builder()
-                    .uri("/api/v1/progress/overview")
-                    .header(AUTHORIZATION, bearer_header(&token))
-                    .body(Body::empty())
-                    .expect("valid request"),
-            )
-            .await
-            .expect("request handled");
-        let progress: ProgressOverviewResponse = response_json(progress_response).await;
+        let progress =
+            wait_for_unit_progress(&app, &token, "ownership", submission.attempt_id, "PASSED")
+                .await;
         let ownership = progress
             .units
             .iter()
