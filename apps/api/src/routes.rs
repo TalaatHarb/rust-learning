@@ -1299,14 +1299,9 @@ mod tests {
             let attempt = wait_for_attempt(&app, &token, submission.attempt_id).await;
             assert_eq!(attempt.status, "PASSED", "{unit_slug} attempt");
 
-            let progress = wait_for_unit_progress(
-                &app,
-                &token,
-                unit_slug,
-                submission.attempt_id,
-                "PASSED",
-            )
-            .await;
+            let progress =
+                wait_for_unit_progress(&app, &token, unit_slug, submission.attempt_id, "PASSED")
+                    .await;
             let unit = progress
                 .units
                 .iter()
