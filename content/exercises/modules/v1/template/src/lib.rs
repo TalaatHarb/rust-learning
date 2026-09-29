@@ -1,6 +1,6 @@
 pub mod text_tools {
-    fn count_words(text: &str) -> usize {
-        text.split_whitespace().count()
+    fn count_words(_text: &str) -> usize {
+        0
     }
 
     pub fn word_count(text: &str) -> usize {

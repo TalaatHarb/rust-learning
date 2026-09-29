@@ -895,6 +895,30 @@ mod tests {
                 },
                 String::new(),
             ),
+            "exercise.rust.types.tuple-basics.v1" => (
+                if payload.code.contains("summarize_reading") {
+                    "PASSED"
+                } else {
+                    "FAILED"
+                },
+                String::new(),
+            ),
+            "exercise.rust.pattern-matching.classify-value.v1" => (
+                if payload.code.contains("describe_signal") {
+                    "PASSED"
+                } else {
+                    "FAILED"
+                },
+                String::new(),
+            ),
+            "exercise.rust.modules.public-api.v1" => (
+                if payload.code.contains("word_summary") {
+                    "PASSED"
+                } else {
+                    "FAILED"
+                },
+                String::new(),
+            ),
             _ => ("ERROR", "unsupported exercise".to_string()),
         };
 
@@ -1119,7 +1143,10 @@ mod tests {
                 "ownership",
                 "borrowing",
                 "references",
-                "slices"
+                "slices",
+                "types",
+                "pattern-matching",
+                "modules"
             ]
         );
     }
@@ -1221,6 +1248,75 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn next_curriculum_submissions_update_each_unit_progress() {
+        let Some(state) = test_state().await else {
+            return;
+        };
+
+        let app = router(state);
+        let token = test_token("secret", "test-user-next-curriculum", &["LEARNER"]);
+        let submissions = [
+            (
+                "exercise.rust.types.tuple-basics.v1",
+                "types",
+                "pub fn summarize_reading(_: (u8, bool), _: [i16; 3]) -> (u8, bool, i32) { (0, false, 0) }",
+            ),
+            (
+                "exercise.rust.pattern-matching.classify-value.v1",
+                "pattern-matching",
+                "pub fn describe_signal(_: Signal) -> String { String::new() }",
+            ),
+            (
+                "exercise.rust.modules.public-api.v1",
+                "modules",
+                "pub fn word_summary(_: &str) -> String { String::new() }",
+            ),
+        ];
+
+        for (exercise_id, unit_slug, code) in submissions {
+            let submission_response = app
+                .clone()
+                .oneshot(
+                    Request::builder()
+                        .method("POST")
+                        .uri("/api/v1/attempts/submissions")
+                        .header(AUTHORIZATION, bearer_header(&token))
+                        .header(CONTENT_TYPE, "application/json")
+                        .body(Body::from(
+                            serde_json::json!({
+                                "exercise_id": exercise_id,
+                                "code": code
+                            })
+                            .to_string(),
+                        ))
+                        .expect("valid request"),
+                )
+                .await
+                .expect("request handled");
+            assert_eq!(submission_response.status(), StatusCode::OK);
+
+            let submission: SubmissionResponse = response_json(submission_response).await;
+            let attempt = wait_for_attempt(&app, &token, submission.attempt_id).await;
+            assert_eq!(attempt.status, "PASSED", "{unit_slug} attempt");
+
+            let progress = wait_for_unit_progress(
+                &app,
+                &token,
+                unit_slug,
+                submission.attempt_id,
+                "PASSED",
+            )
+            .await;
+            let unit = progress
+                .units
+                .iter()
+                .find(|unit| unit.unit_slug == unit_slug)
+                .expect("unit progress");
+            assert_eq!(unit.latest_attempt_id, Some(submission.attempt_id));
+        }
+    }
+
+    #[tokio::test]
     async fn multi_unit_submissions_update_progress_and_resume_target() {
         let Some(state) = test_state().await else {
             return;
@@ -1296,7 +1392,7 @@ mod tests {
         let progress: ProgressOverviewResponse = response_json(progress_response).await;
 
         assert_eq!(progress.resume_unit_slug, "functions");
-        assert_eq!(progress.units.len(), 7);
+        assert_eq!(progress.units.len(), 10);
         assert_eq!(
             progress
                 .units

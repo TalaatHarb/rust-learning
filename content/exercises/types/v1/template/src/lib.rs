@@ -1,7 +1,5 @@
-pub fn summarize_reading(reading: (u8, bool), samples: [i16; 3]) -> (u8, bool, i32) {
-    let (level, active) = reading;
-    let total: i32 = samples.iter().map(|sample| i32::from(*sample)).sum();
-    (level, active, total)
+pub fn summarize_reading(_reading: (u8, bool), _samples: [i16; 3]) -> (u8, bool, i32) {
+    (0, false, 0)
 }
 
 #[cfg(test)]

@@ -24,7 +24,8 @@
 - [x] Bounded executor stdout/stderr capture and terminate timed-out process groups.
 - [x] Completed the local Keycloak learner profile so the seeded account can authenticate.
 - [x] Documented the test database configuration and ran the full MVP smoke flow and validation.
+- [x] Implemented the Types, Pattern Matching, and Modules learning slices with exercises, roadmap ordering, executor mappings, and API progress coverage.
 
 ## Next planned tasks
 
-- [ ] Implement the next Rust Foundations curriculum sequence after Slices: [Types, Pattern Matching, and Modules](next-learning-slices.md). Complete each slice end to end and verify the MVP checklist before marking the sequence done.
+- All planned curriculum slices in [next-learning-slices.md](next-learning-slices.md) are implemented; continue with the next curriculum planning task.
