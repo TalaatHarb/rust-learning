@@ -18,6 +18,8 @@
 - [ ] `npm run validate` passes.
 - [ ] Auth integration tests pass.
 - [ ] Attempt state transitions are covered by tests.
+- [x] CI runs content validation, Rust fmt/clippy/test, and web lint/build on every push and pull request (`.github/workflows/ci.yml`).
+- [x] Tagged releases (`v*.*.*`) build binaries/web assets and publish a GitHub release automatically (`.github/workflows/release.yml`).
 
 ## Documentation
 

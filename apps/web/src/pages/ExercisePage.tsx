@@ -42,6 +42,12 @@ export function ExercisePage() {
     },
   })
 
+  useEffect(() => {
+    if (data?.starter_code && code.length === 0) {
+      setCode(data.starter_code)
+    }
+  }, [code.length, data?.starter_code])
+
   if (isLoading) {
     return (
       <section className="panel">
@@ -59,12 +65,6 @@ export function ExercisePage() {
       </section>
     )
   }
-
-  useEffect(() => {
-    if (data?.starter_code && code.length === 0) {
-      setCode(data.starter_code)
-    }
-  }, [code.length, data?.starter_code])
 
   return (
     <>
