@@ -252,14 +252,9 @@ async fn submit_attempt(
         )
     })?;
 
-    update_progress(&state, attempt_id).await.map_err(|error| {
-        error!(%error, "failed to record queued progress");
-        AppError::new(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "PROGRESS_UPDATE_FAILED",
-            "failed to record progress",
-        )
-    })?;
+    if let Err(error) = update_progress(&state, attempt_id).await {
+        error!(%error, attempt_id = %attempt_id, "failed to record queued progress");
+    }
 
     let state_for_worker = state.clone();
     let exercise_id = payload.exercise_id.clone();
@@ -622,7 +617,9 @@ async fn process_attempt(
         .execute(&state.db)
         .await?;
 
-    update_progress(&state, attempt_id).await?;
+    if let Err(error) = update_progress(&state, attempt_id).await {
+        error!(%error, attempt_id = %attempt_id, "failed to record running progress");
+    }
 
     let result = execute_submission(
         &state.http_client,
