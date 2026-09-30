@@ -28,4 +28,4 @@
 
 ## Next planned tasks
 
-- All planned curriculum slices in [next-learning-slices.md](next-learning-slices.md) are implemented; continue with the next curriculum planning task.
+- Plan and implement the Structs curriculum slice described in [next-learning-slices.md](next-learning-slices.md), including its exercise, roadmap ordering, executor mapping, and learner-flow coverage.
