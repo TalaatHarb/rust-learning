@@ -542,14 +542,16 @@ async fn unit_by_id(Path(unit_id): Path<String>) -> AppResult<Json<UnitResponse>
             )
         })?;
     let starter_path = template_root.join(&exercise.starter_file);
-    let starter_path = tokio::fs::canonicalize(starter_path).await.map_err(|error| {
-        debug!(%error, "failed to canonicalize starter file path");
-        AppError::new(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "EXERCISE_READ_FAILED",
-            "failed to load starter code",
-        )
-    })?;
+    let starter_path = tokio::fs::canonicalize(starter_path)
+        .await
+        .map_err(|error| {
+            debug!(%error, "failed to canonicalize starter file path");
+            AppError::new(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "EXERCISE_READ_FAILED",
+                "failed to load starter code",
+            )
+        })?;
     if !starter_path.starts_with(&template_root) {
         debug!(starter_path = ?starter_path, template_root = ?template_root, "starter path escaped template root");
         return Err(AppError::new(
@@ -558,14 +560,16 @@ async fn unit_by_id(Path(unit_id): Path<String>) -> AppResult<Json<UnitResponse>
             "invalid exercise starter path",
         ));
     }
-    let starter_code = tokio::fs::read_to_string(starter_path).await.map_err(|error| {
-        debug!(%error, "failed to read starter code file");
-        AppError::new(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "EXERCISE_READ_FAILED",
-            "failed to load starter code",
-        )
-    })?;
+    let starter_code = tokio::fs::read_to_string(starter_path)
+        .await
+        .map_err(|error| {
+            debug!(%error, "failed to read starter code file");
+            AppError::new(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "EXERCISE_READ_FAILED",
+                "failed to load starter code",
+            )
+        })?;
 
     debug!(unit_id = %unit_id, "successfully loaded unit and starter code");
     Ok(Json(UnitResponse {
