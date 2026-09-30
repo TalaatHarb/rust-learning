@@ -1401,7 +1401,7 @@ mod tests {
         let progress: ProgressOverviewResponse = response_json(progress_response).await;
 
         assert_eq!(progress.resume_unit_slug, "functions");
-        assert_eq!(progress.units.len(), 10);
+        assert_eq!(progress.units.len(), 11);
         assert_eq!(
             progress
                 .units
