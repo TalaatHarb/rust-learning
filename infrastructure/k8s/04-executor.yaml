@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: executor
+  namespace: rust-learning
+  labels:
+    app: executor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: executor
+  template:
+    metadata:
+      labels:
+        app: executor
+    spec:
+      containers:
+        - name: executor
+          image: ghcr.io/talaatharb/rust-learning/executor:latest
+          ports:
+            - name: http
+              containerPort: 8082
+          env:
+            - name: EXECUTOR_HOST
+              value: "0.0.0.0"
+            - name: EXECUTOR_PORT
+              value: "8082"
+            - name: EXECUTOR_TIMEOUT_SECS
+              value: "8"
+            - name: EXECUTOR_OUTPUT_LIMIT_BYTES
+              value: "20000"
+            - name: EXECUTOR_WORKDIR_ROOT
+              value: "/tmp/rust-learning-executor"
+            - name: RUST_LOG
+              value: "info"
+          volumeMounts:
+            - name: tmp-workdir
+              mountPath: /tmp
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8082
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8082
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 3
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+      volumes:
+        - name: tmp-workdir
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: executor
+  namespace: rust-learning
+  labels:
+    app: executor
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8082
+      targetPort: 8082
+  selector:
+    app: executor

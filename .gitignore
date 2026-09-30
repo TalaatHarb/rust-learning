@@ -29,3 +29,7 @@ apps/web/.vite/
 .env
 .env.local
 .env.*.local
+
+# Kubernetes secrets
+infrastructure/k8s/secrets/
+

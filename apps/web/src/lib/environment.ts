@@ -21,7 +21,7 @@ export const environment = {
   oidcAuthority:
     runtimeEnvironment?.VITE_OIDC_AUTHORITY ||
     import.meta.env.VITE_OIDC_AUTHORITY ||
-    'http://localhost:8081/realms/rust-learning',
+    'http://localhost:8081/realms/nextechincubator',
   oidcClientId:
     runtimeEnvironment?.VITE_OIDC_CLIENT_ID ||
     import.meta.env.VITE_OIDC_CLIENT_ID ||

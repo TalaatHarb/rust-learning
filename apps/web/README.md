@@ -21,7 +21,7 @@ React + TypeScript + Vite Progressive Web App for the Rust Learning Platform.
 Copy `.env.example` to `.env` to configure the development server or static build. The supported public settings are:
 
 - `VITE_API_BASE_URL` — API base URL (default `http://localhost:8080`).
-- `VITE_OIDC_AUTHORITY` — OIDC/Keycloak realm authority (default `http://localhost:8081/realms/rust-learning`).
+- `VITE_OIDC_AUTHORITY` — OIDC/Keycloak realm authority (default `http://localhost:8081/realms/nextechincubator`).
 - `VITE_OIDC_CLIENT_ID` — OIDC client ID (default `rust-learning-web`).
 - `VITE_OIDC_REDIRECT_URI` — login/logout redirect URI (defaults to the current page origin).
 

@@ -8,7 +8,7 @@ A monorepo for building a Rust learning web platform with a React PWA frontend, 
 - `apps/api` — Axum API with auth, attempts, and progress endpoints.
 - `apps/executor` — Rust executor service for exercise compilation/testing.
 - `content` — curriculum, lesson, exercise, and roadmap source files.
-- `infrastructure` — local Docker Compose stack (Postgres, Keycloak, executor sandbox baseline).
+- `infrastructure` — local Docker Compose stack (Postgres, Keycloak, executor sandbox baseline) and Kubernetes (`k8s`) deployment manifests.
 - `docs` — architecture, workflow, ADR, and MVP checklist documentation.
 
 ## Quick start
@@ -67,8 +67,8 @@ Run it with the database, executor, and Keycloak endpoints reachable from the co
 docker run --rm -p 8080:8080 `
   -e DATABASE_URL="postgres://user:password@db-host:5432/rust_learning" `
   -e EXECUTOR_BASE_URL="http://executor-host:8082" `
-  -e JWT_ISSUER="https://keycloak.example.com/realms/rust-learning" `
-  -e JWT_JWKS_URL="https://keycloak.example.com/realms/rust-learning/protocol/openid-connect/certs" `
+  -e JWT_ISSUER="https://keycloak.example.com/realms/nextechincubator" `
+  -e JWT_JWKS_URL="https://keycloak.example.com/realms/nextechincubator/protocol/openid-connect/certs" `
   rust-learning-api
 ```
 
@@ -86,9 +86,9 @@ The API and executor read their configuration from environment variables. Each v
 | `API_PORT` | `8080` | Port the API listens on. |
 | `DATABASE_URL` | `postgres://rust_learning:rust_learning@localhost:5432/rust_learning` | PostgreSQL connection URL. Configure this as a full URL, including host, port, database, and credentials. |
 | `EXECUTOR_BASE_URL` | `http://127.0.0.1:8082` | Base URL used by the API to contact the executor. |
-| `JWT_ISSUER` | `http://localhost:8081/realms/rust-learning` | Expected JWT issuer; set this to your Keycloak realm issuer. |
+| `JWT_ISSUER` | `http://localhost:8081/realms/nextechincubator` | Expected JWT issuer; set this to your Keycloak realm issuer. |
 | `JWT_AUDIENCE` | `rust-learning-web` | Expected JWT audience. |
-| `JWT_JWKS_URL` | `http://localhost:8081/realms/rust-learning/protocol/openid-connect/certs` | Keycloak JWKS endpoint used to validate JWTs. |
+| `JWT_JWKS_URL` | `http://localhost:8081/realms/nextechincubator/protocol/openid-connect/certs` | Keycloak JWKS endpoint used to validate JWTs. |
 | `JWT_HS256_SECRET` | Unset | Optional HS256 signing secret. When set, the API uses HS256 validation instead of Keycloak JWKS validation. Leave unset to use JWKS. |
 
 ### Executor (`apps/executor`)
@@ -106,8 +106,8 @@ For example, configure and start the API in PowerShell:
 ```powershell
 $env:API_PORT = "9000"
 $env:DATABASE_URL = "postgres://user:password@db-host:5432/rust_learning"
-$env:JWT_ISSUER = "https://keycloak.example.com/realms/rust-learning"
-$env:JWT_JWKS_URL = "https://keycloak.example.com/realms/rust-learning/protocol/openid-connect/certs"
+$env:JWT_ISSUER = "https://keycloak.example.com/realms/nextechincubator"
+$env:JWT_JWKS_URL = "https://keycloak.example.com/realms/nextechincubator/protocol/openid-connect/certs"
 cargo run -p api
 ```
 

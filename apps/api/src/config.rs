@@ -30,11 +30,11 @@ impl Config {
             env::var("EXECUTOR_BASE_URL").unwrap_or_else(|_| "http://127.0.0.1:8082".to_string());
 
         let jwt_issuer = env::var("JWT_ISSUER")
-            .unwrap_or_else(|_| "http://localhost:8081/realms/rust-learning".to_string());
+            .unwrap_or_else(|_| "http://localhost:8081/realms/nextechincubator".to_string());
         let jwt_audience =
             env::var("JWT_AUDIENCE").unwrap_or_else(|_| "rust-learning-web".to_string());
         let jwt_jwks_url = env::var("JWT_JWKS_URL").unwrap_or_else(|_| {
-            "http://localhost:8081/realms/rust-learning/protocol/openid-connect/certs".to_string()
+            "http://localhost:8081/realms/nextechincubator/protocol/openid-connect/certs".to_string()
         });
         let jwt_hs256_secret = env::var("JWT_HS256_SECRET").ok();
 

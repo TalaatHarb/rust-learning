@@ -9,4 +9,7 @@ export const oidcConfig: AuthProviderProps = {
   response_type: 'code',
   scope: 'openid profile email',
   automaticSilentRenew: true,
+  onSigninCallback: () => {
+    window.history.replaceState({}, document.title, window.location.pathname)
+  },
 }
