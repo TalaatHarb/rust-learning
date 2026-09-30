@@ -482,7 +482,11 @@ fn truncate_output(value: String, max: usize) -> String {
         return value;
     }
 
-    debug!(original_len = value.len(), max = max, "truncating command output");
+    debug!(
+        original_len = value.len(),
+        max = max,
+        "truncating command output"
+    );
     let mut output = value;
     output.truncate(max);
     output.push_str("\n...[truncated]");
