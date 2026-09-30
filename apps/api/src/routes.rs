@@ -919,6 +919,14 @@ mod tests {
                 },
                 String::new(),
             ),
+            "exercise.rust.structs.build-profile.v1" => (
+                if payload.code.contains("struct Profile") && payload.code.contains("summary") {
+                    "PASSED"
+                } else {
+                    "FAILED"
+                },
+                String::new(),
+            ),
             _ => ("ERROR", "unsupported exercise".to_string()),
         };
 
@@ -1146,7 +1154,8 @@ mod tests {
                 "slices",
                 "types",
                 "pattern-matching",
-                "modules"
+                "modules",
+                "structs"
             ]
         );
     }
@@ -1270,6 +1279,11 @@ mod tests {
                 "exercise.rust.modules.public-api.v1",
                 "modules",
                 "pub fn word_summary(_: &str) -> String { String::new() }",
+            ),
+            (
+                "exercise.rust.structs.build-profile.v1",
+                "structs",
+                "pub struct Profile { pub name: String } pub fn summary(_: &Profile) -> String { String::new() }",
             ),
         ];
 

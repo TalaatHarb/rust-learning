@@ -1,6 +1,6 @@
 # Next Learning Slices
 
-This plan sequences the next three Rust Foundations units after **Slices**. Each slice should be delivered end to end before starting the next: curriculum content, runnable exercise, roadmap integration, executor support, and learner-flow verification.
+This plan sequences the next Rust Foundations unit after **Modules**. Each slice should be delivered end to end: curriculum content, runnable exercise, roadmap integration, executor support, and learner-flow verification.
 
 ## Shared implementation requirements
 
@@ -85,6 +85,31 @@ The exercise should complete a small public API over an internal module, requiri
 - The exercise demonstrates a meaningful public/private boundary and passes its tests.
 - The learner-facing compiler feedback identifies a visibility or path issue relevant to the lesson.
 
+## 4. Structs
+
+- **Slug:** `structs`
+- **Prerequisite:** `unit.rust.modules.v1`
+- **Content IDs:** `unit.rust.structs.v1`; `exercise.rust.structs.build-profile.v1`
+
+### Learning outcomes
+
+- Define a struct with named fields and choose appropriate field types.
+- Initialize structs and access or update their fields.
+- Add and call methods that operate on struct instances.
+- Distinguish public and private struct fields when designing a small API.
+
+### Lesson and exercise scope
+
+Introduce named-field structs and struct literals, then demonstrate field access, mutable updates, and methods. Explain how field visibility affects callers while keeping tuple structs, unit-like structs, and advanced trait implementations out of scope.
+
+The exercise should build a small profile struct, expose a method that derives or formats profile information, and keep at least one implementation detail private. Tests should verify construction, field access through the supported API, method behavior, and a boundary case such as an empty profile field.
+
+### Completion checks
+
+- The learner can define, initialize, and access a struct without confusing fields with local variables.
+- The exercise demonstrates methods and a meaningful public/private field boundary.
+- The expected solution passes its tests, including the boundary case, and the starter provides a clear compiling scaffold.
+
 ## Integration and release of the sequence
 
-After each unit is implemented, verify that it appears after its prerequisite in the Foundations roadmap, loads through the existing unit/exercise flow, and can be submitted and reflected in learner progress. Once all three are integrated, check the full roadmap ordering and prerequisite graph, then complete the existing validation and MVP smoke-flow checks.
+After the unit is implemented, verify that it appears after its prerequisite in the Foundations roadmap, loads through the existing unit/exercise flow, and can be submitted and reflected in learner progress. Add the exercise ID to the executor template mapping and cover submission/progress behavior with the existing API integration-test patterns. Check the full roadmap ordering and prerequisite graph, then run `npm run content:validate` and `npm run validate`; complete the MVP smoke-flow checks when the test database is available.
