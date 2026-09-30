@@ -18,7 +18,7 @@ use tokio::{
     net::TcpListener,
     process::{Child, Command},
 };
-use tracing::{error, info};
+use tracing::{debug, error, info};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 use uuid::Uuid;
 
@@ -75,11 +75,15 @@ async fn main() -> anyhow::Result<()> {
             .unwrap_or_else(|_| PathBuf::from("/tmp/rust-learning-executor")),
     };
 
+    debug!(?config, "executor configuration initialized");
+
     tokio::fs::create_dir_all(&config.workdir_root)
         .await
         .context("failed to initialize executor workdir")?;
+    debug!(workdir = ?config.workdir_root, "executor workdir initialized");
 
-    let listener = TcpListener::bind(format!("{}:{}", config.host, config.port))
+    let bind_address = format!("{}:{}", config.host, config.port);
+    let listener = TcpListener::bind(&bind_address)
         .await
         .context("failed to bind executor listener")?;
 
@@ -88,7 +92,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/execute", post(execute))
         .with_state(config);
 
-    info!("executor service started");
+    info!(address = %bind_address, "executor service started");
     axum::serve(listener, app)
         .await
         .context("executor stopped unexpectedly")?;
@@ -104,6 +108,8 @@ fn init_tracing() {
 }
 
 async fn health() -> Json<HealthResponse> {
+    info!("health check API hit");
+    debug!("health check responding ok");
     Json(HealthResponse { status: "ok" })
 }
 
@@ -111,19 +117,40 @@ async fn execute(
     axum::extract::State(config): axum::extract::State<Config>,
     Json(payload): Json<ExecuteRequest>,
 ) -> Result<Json<ExecuteResponse>, (StatusCode, Json<serde_json::Value>)> {
+    info!(
+        attempt_id = %payload.attempt_id,
+        exercise_id = %payload.exercise_id,
+        "execute API hit"
+    );
     let start = Instant::now();
 
+    debug!(
+        attempt_id = %payload.attempt_id,
+        exercise_id = %payload.exercise_id,
+        code_bytes = payload.code.len(),
+        "starting exercise execution"
+    );
     let result = execute_inner(&config, &payload).await;
 
     match result {
-        Ok((status, stdout, stderr)) => Ok(Json(ExecuteResponse {
-            status,
-            stdout,
-            stderr,
-            duration_ms: start.elapsed().as_millis() as u64,
-        })),
+        Ok((status, stdout, stderr)) => {
+            let duration_ms = start.elapsed().as_millis() as u64;
+            debug!(
+                attempt_id = %payload.attempt_id,
+                status = %status,
+                duration_ms = duration_ms,
+                "execution completed successfully"
+            );
+            Ok(Json(ExecuteResponse {
+                status,
+                stdout,
+                stderr,
+                duration_ms,
+            }))
+        }
         Err(error) => {
             error!(%error, attempt_id = %payload.attempt_id, "execution failed");
+            debug!(attempt_id = %payload.attempt_id, %error, "execution failed with internal error");
             Err((
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(serde_json::json!({
@@ -141,21 +168,38 @@ async fn execute_inner(
     config: &Config,
     payload: &ExecuteRequest,
 ) -> anyhow::Result<(String, String, String)> {
+    debug!(
+        attempt_id = %payload.attempt_id,
+        exercise_id = %payload.exercise_id,
+        "mapping exercise template path"
+    );
     let template_path = map_template_path(&payload.exercise_id)?;
     let tempdir = Builder::new()
         .prefix("attempt-")
         .tempdir_in(&config.workdir_root)
         .context("failed to create temp workspace")?;
 
+    debug!(
+        attempt_id = %payload.attempt_id,
+        template_path = ?template_path,
+        tempdir = ?tempdir.path(),
+        "copying template to temp workspace"
+    );
     copy_dir_recursive(template_path, tempdir.path())
         .await
         .context("failed to copy template")?;
 
     let starter_path = tempdir.path().join("src/lib.rs");
+    debug!(
+        attempt_id = %payload.attempt_id,
+        starter_path = ?starter_path,
+        "writing learner submission code"
+    );
     tokio::fs::write(&starter_path, &payload.code)
         .await
         .context("failed to write learner submission")?;
 
+    debug!(attempt_id = %payload.attempt_id, "running cargo check");
     let check = run_command(
         "cargo",
         &["check"],
@@ -166,6 +210,7 @@ async fn execute_inner(
     .await?;
 
     if check.timed_out {
+        debug!(attempt_id = %payload.attempt_id, "cargo check timed out");
         return Ok((
             "TIMEOUT".to_string(),
             check.stdout,
@@ -174,9 +219,11 @@ async fn execute_inner(
     }
 
     if !check.success {
+        debug!(attempt_id = %payload.attempt_id, "cargo check failed");
         return Ok(("FAILED".to_string(), check.stdout, check.stderr));
     }
 
+    debug!(attempt_id = %payload.attempt_id, "cargo check passed, running cargo test");
     let tests = run_command(
         "cargo",
         &["test", "--quiet"],
@@ -187,6 +234,7 @@ async fn execute_inner(
     .await?;
 
     if tests.timed_out {
+        debug!(attempt_id = %payload.attempt_id, "cargo test timed out");
         return Ok((
             "TIMEOUT".to_string(),
             format!("{}\n{}", check.stdout, tests.stdout),
@@ -198,6 +246,12 @@ async fn execute_inner(
     let combined_stderr = format!("{}\n{}", check.stderr, tests.stderr);
 
     let status = if tests.success { "PASSED" } else { "FAILED" };
+    debug!(
+        attempt_id = %payload.attempt_id,
+        status = %status,
+        test_success = tests.success,
+        "cargo test finished"
+    );
 
     Ok((
         status.to_string(),
@@ -207,6 +261,7 @@ async fn execute_inner(
 }
 
 fn map_template_path(exercise_id: &str) -> anyhow::Result<&'static Path> {
+    debug!(exercise_id = %exercise_id, "mapping template path for exercise");
     match exercise_id {
         "exercise.rust.variables.mutable-counter.v1" => {
             Ok(Path::new("content/exercises/variables/v1/template"))
@@ -241,11 +296,15 @@ fn map_template_path(exercise_id: &str) -> anyhow::Result<&'static Path> {
         "exercise.rust.structs.build-profile.v1" => {
             Ok(Path::new("content/exercises/structs/v1/template"))
         }
-        _ => anyhow::bail!("unsupported exercise_id: {exercise_id}"),
+        _ => {
+            debug!(exercise_id = %exercise_id, "unsupported exercise template requested");
+            anyhow::bail!("unsupported exercise_id: {exercise_id}")
+        }
     }
 }
 
 async fn copy_dir_recursive(from: &Path, to: &Path) -> anyhow::Result<()> {
+    debug!(from = ?from, to = ?to, "copying directory recursively");
     let mut stack = vec![(from.to_path_buf(), to.to_path_buf())];
 
     while let Some((src, dst)) = stack.pop() {
@@ -282,6 +341,14 @@ async fn run_command(
     timeout: Duration,
     output_limit: usize,
 ) -> anyhow::Result<CommandResult> {
+    debug!(
+        program = %program,
+        args = ?args,
+        cwd = ?cwd,
+        timeout_ms = timeout.as_millis() as u64,
+        output_limit = output_limit,
+        "running command"
+    );
     let mut command = Command::new(program);
     command
         .args(args)
@@ -294,6 +361,7 @@ async fn run_command(
 
     let mut child = command.spawn()?;
     let process_id = child.id();
+    debug!(program = %program, pid = ?process_id, "spawned child process");
     let stdout = child
         .stdout
         .take()
@@ -320,6 +388,12 @@ async fn run_command(
     match command_result {
         Ok(result) => {
             let (success, stdout, stderr) = result?;
+            debug!(
+                program = %program,
+                pid = ?process_id,
+                success = success,
+                "command finished execution"
+            );
             Ok(CommandResult {
                 success,
                 timed_out: false,
@@ -328,6 +402,11 @@ async fn run_command(
             })
         }
         Err(_) => {
+            debug!(
+                program = %program,
+                pid = ?process_id,
+                "command execution timed out, terminating process"
+            );
             terminate_process_group(process_id, &mut child).await?;
             child.wait().await?;
             let stdout = stdout_task
@@ -374,6 +453,7 @@ async fn read_limited(
 }
 
 async fn terminate_process_group(process_id: Option<u32>, child: &mut Child) -> anyhow::Result<()> {
+    debug!(pid = ?process_id, "terminating process group");
     #[cfg(unix)]
     let _ = child;
     #[cfg(unix)]
@@ -402,6 +482,7 @@ fn truncate_output(value: String, max: usize) -> String {
         return value;
     }
 
+    debug!(original_len = value.len(), max = max, "truncating command output");
     let mut output = value;
     output.truncate(max);
     output.push_str("\n...[truncated]");

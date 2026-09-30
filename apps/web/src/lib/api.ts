@@ -5,11 +5,10 @@ import type {
   SubmissionResponse,
   UnitResponse,
 } from '../types/api'
-
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080'
+import { environment } from './environment'
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(`${apiBaseUrl}${path}`, {
+  const response = await fetch(`${environment.apiBaseUrl}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',

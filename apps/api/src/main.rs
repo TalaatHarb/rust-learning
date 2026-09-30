@@ -14,7 +14,7 @@ use config::Config;
 use reqwest::Client;
 use sqlx::PgPool;
 use tokio::{net::TcpListener, signal};
-use tracing::{info, warn};
+use tracing::{debug, info, warn};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 #[derive(Clone)]
@@ -30,22 +30,45 @@ async fn main() -> anyhow::Result<()> {
     init_tracing();
 
     let config = Arc::new(Config::from_env());
+    debug!(
+        host = %config.host,
+        port = config.port,
+        executor_base_url = %config.executor_base_url,
+        jwt_issuer = %config.jwt_issuer,
+        jwt_audience = %config.jwt_audience,
+        jwt_jwks_url = %config.jwt_jwks_url,
+        hs256_enabled = config.jwt_hs256_secret.is_some(),
+        "loaded API configuration"
+    );
 
     let pool = db::connect(&config.database_url)
         .await
         .context("failed to connect to postgres")?;
+    debug!("running database migrations");
     sqlx::migrate!("./migrations")
         .run(&pool)
         .await
         .context("failed to run migrations")?;
+    debug!("database migrations applied successfully");
 
     let auth = if let Some(secret) = config.jwt_hs256_secret.clone() {
+        debug!(
+            issuer = %config.jwt_issuer,
+            audience = %config.jwt_audience,
+            "initializing HS256 authenticator"
+        );
         Authenticator::hs256(
             secret,
             config.jwt_issuer.clone(),
             config.jwt_audience.clone(),
         )
     } else {
+        debug!(
+            issuer = %config.jwt_issuer,
+            audience = %config.jwt_audience,
+            jwks_url = %config.jwt_jwks_url,
+            "initializing JWKS authenticator"
+        );
         Authenticator::jwks(
             config.jwt_issuer.clone(),
             config.jwt_audience.clone(),

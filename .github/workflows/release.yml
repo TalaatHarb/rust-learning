@@ -56,6 +56,42 @@ jobs:
           path: rust-learning-*.tar.gz
           if-no-files-found: error
 
+  build-windows-binaries:
+    name: Build Windows release binaries
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build API and executor
+        run: cargo build --workspace --release --target x86_64-pc-windows-msvc
+
+      - name: Package binaries
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}"
+          $stageDir = "rust-learning-$version-x86_64-pc-windows-msvc"
+          New-Item -ItemType Directory -Path $stageDir | Out-Null
+          Copy-Item -Path @(
+            "target/x86_64-pc-windows-msvc/release/api.exe",
+            "target/x86_64-pc-windows-msvc/release/executor.exe"
+          ) -Destination $stageDir
+          Copy-Item content "$stageDir/content" -Recurse
+          Compress-Archive -Path "$stageDir/*" -DestinationPath "$stageDir.zip"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-learning-x86_64-pc-windows-msvc
+          path: rust-learning-*.zip
+          if-no-files-found: error
+
   build-web:
     name: Build web app
     runs-on: ubuntu-latest
@@ -113,9 +149,63 @@ jobs:
             ghcr.io/${{ steps.image.outputs.repository }}/executor:${{ github.ref_name }}
             ghcr.io/${{ steps.image.outputs.repository }}/executor:latest
 
+  build-api-image:
+    name: Build and push API image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute lowercase image repository
+        id: image
+        run: echo "repository=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ steps.image.outputs.repository }}/api:${{ github.ref_name }}
+            ghcr.io/${{ steps.image.outputs.repository }}/api:latest
+
+  build-web-image:
+    name: Build and push web image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute lowercase image repository
+        id: image
+        run: echo "repository=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ steps.image.outputs.repository }}/web:${{ github.ref_name }}
+            ghcr.io/${{ steps.image.outputs.repository }}/web:latest
+
   release:
     name: Publish GitHub release
-    needs: [build-binaries, build-web, build-executor-image]
+    needs: [build-binaries, build-windows-binaries, build-web, build-api-image, build-executor-image, build-web-image]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -130,13 +220,13 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p release-assets
-          find dist -type f -name "*.tar.gz" -exec cp {} release-assets/ \;
+          find dist -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec cp {} release-assets/ \;
           ls -la release-assets
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: release-assets/*.tar.gz
+          files: release-assets/*
           generate_release_notes: true
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}

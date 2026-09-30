@@ -8,6 +8,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
+      workbox: {
+        globIgnores: ['**/env-config.js'],
+      },
       manifest: {
         name: 'Rust Learning Platform',
         short_name: 'Rust Learning',

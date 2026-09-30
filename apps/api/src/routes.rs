@@ -13,7 +13,7 @@ use std::{
     io::ErrorKind,
     path::{Path as FsPath, PathBuf},
 };
-use tracing::{error, info};
+use tracing::{debug, error, info};
 use uuid::Uuid;
 
 use crate::{
@@ -193,10 +193,18 @@ pub fn router(state: AppState) -> Router {
 }
 
 async fn health() -> impl IntoResponse {
+    info!("health check API hit");
+    debug!("health check responding ok");
     Json(HealthResponse { status: "ok" })
 }
 
 async fn me(user: AuthenticatedUser) -> impl IntoResponse {
+    info!(subject = %user.subject, "me API hit");
+    debug!(
+        subject = %user.subject,
+        roles = ?user.roles,
+        "returning authenticated user details"
+    );
     Json(MeResponse {
         subject: user.subject,
         roles: user.roles,
@@ -208,9 +216,15 @@ async fn submit_attempt(
     user: AuthenticatedUser,
     Json(payload): Json<SubmissionRequest>,
 ) -> AppResult<Json<SubmissionResponse>> {
+    info!(
+        user_id = %user.subject,
+        exercise_id = %payload.exercise_id,
+        "submit attempt API hit"
+    );
     ensure_role(&user, &["LEARNER", "AUTHOR", "ADMIN"])?;
 
     if payload.code.trim().is_empty() {
+        debug!(user_id = %user.subject, "submission rejected: empty code payload");
         return Err(AppError::new(
             StatusCode::BAD_REQUEST,
             "SUBMISSION_EMPTY_CODE",
@@ -221,6 +235,7 @@ async fn submit_attempt(
     let attempt_id = Uuid::new_v4();
     let user_id = user.subject;
 
+    debug!(attempt_id = %attempt_id, user_id = %user_id, "upserting user record");
     sqlx::query("INSERT INTO users (id) VALUES ($1) ON CONFLICT (id) DO NOTHING")
         .bind(&user_id)
         .execute(&state.db)
@@ -234,6 +249,12 @@ async fn submit_attempt(
             )
         })?;
 
+    debug!(
+        attempt_id = %attempt_id,
+        user_id = %user_id,
+        exercise_id = %payload.exercise_id,
+        "inserting queued attempt record"
+    );
     sqlx::query(
         r#"
         INSERT INTO attempts (id, user_id, exercise_id, exercise_version, status, submission_code)
@@ -264,6 +285,7 @@ async fn submit_attempt(
     let exercise_id = payload.exercise_id.clone();
     let code = payload.code.clone();
 
+    debug!(attempt_id = %attempt_id, "spawning background attempt processing task");
     tokio::spawn(async move {
         if let Err(error) = process_attempt(state_for_worker, attempt_id, exercise_id, code).await {
             error!(%error, attempt_id = %attempt_id, "attempt processing failed");
@@ -281,8 +303,18 @@ async fn get_attempt(
     user: AuthenticatedUser,
     Path(attempt_id): Path<Uuid>,
 ) -> AppResult<Json<AttemptResponse>> {
+    info!(
+        attempt_id = %attempt_id,
+        user_id = %user.subject,
+        "get attempt API hit"
+    );
     ensure_role(&user, &["LEARNER", "AUTHOR", "ADMIN"])?;
 
+    debug!(
+        attempt_id = %attempt_id,
+        user_id = %user.subject,
+        "querying attempt from database"
+    );
     let row = sqlx::query(
         r#"
         SELECT id, exercise_id, status, COALESCE(stdout, ''), COALESCE(stderr, ''), duration_ms
@@ -294,7 +326,8 @@ async fn get_attempt(
     .bind(&user.subject)
     .fetch_optional(&state.db)
     .await
-    .map_err(|_| {
+    .map_err(|error| {
+        debug!(%error, attempt_id = %attempt_id, "failed to read attempt from database");
         AppError::new(
             StatusCode::INTERNAL_SERVER_ERROR,
             "ATTEMPT_READ_FAILED",
@@ -302,6 +335,7 @@ async fn get_attempt(
         )
     })?
     .ok_or_else(|| {
+        debug!(attempt_id = %attempt_id, user_id = %user.subject, "attempt not found");
         AppError::new(
             StatusCode::NOT_FOUND,
             "ATTEMPT_NOT_FOUND",
@@ -309,20 +343,29 @@ async fn get_attempt(
         )
     })?;
 
-    Ok(Json(AttemptResponse {
+    let response = AttemptResponse {
         attempt_id: row.get::<Uuid, _>(0),
         exercise_id: row.get::<String, _>(1),
         status: row.get::<String, _>(2),
         stdout: row.get::<String, _>(3),
         stderr: row.get::<String, _>(4),
         duration_ms: row.get::<Option<i64>, _>(5),
-    }))
+    };
+    debug!(
+        attempt_id = %attempt_id,
+        status = %response.status,
+        "returning attempt record"
+    );
+
+    Ok(Json(response))
 }
 
 async fn foundations_roadmap() -> AppResult<Json<RoadmapResponse>> {
+    info!("foundations roadmap API hit");
+    debug!("loading foundations roadmap content");
     let roadmap = load_foundations_roadmap().await?;
 
-    Ok(Json(RoadmapResponse {
+    let response = RoadmapResponse {
         id: roadmap.id,
         title: roadmap.title,
         modules: roadmap
@@ -344,15 +387,23 @@ async fn foundations_roadmap() -> AppResult<Json<RoadmapResponse>> {
                     .collect(),
             })
             .collect(),
-    }))
+    };
+    debug!(
+        module_count = response.modules.len(),
+        "returning foundations roadmap response"
+    );
+
+    Ok(Json(response))
 }
 
 async fn progress_overview(
     State(state): State<AppState>,
     user: AuthenticatedUser,
 ) -> AppResult<Json<ProgressOverviewResponse>> {
+    info!(user_id = %user.subject, "progress overview API hit");
     ensure_role(&user, &["LEARNER", "AUTHOR", "ADMIN"])?;
 
+    debug!(user_id = %user.subject, "loading roadmap and querying user progress from database");
     let roadmap = load_foundations_roadmap().await?;
     let rows = sqlx::query(
         r#"
@@ -368,7 +419,8 @@ async fn progress_overview(
     .bind(&user.subject)
     .fetch_all(&state.db)
     .await
-    .map_err(|_| {
+    .map_err(|error| {
+        debug!(%error, user_id = %user.subject, "failed to query progress records");
         AppError::new(
             StatusCode::INTERNAL_SERVER_ERROR,
             "PROGRESS_READ_FAILED",
@@ -387,6 +439,11 @@ async fn progress_overview(
             ),
         );
     }
+    debug!(
+        user_id = %user.subject,
+        recorded_units = progress_by_unit.len(),
+        "mapped user progress entries"
+    );
 
     let units = roadmap
         .modules
@@ -414,12 +471,20 @@ async fn progress_overview(
         .find(|unit| unit.status != "PASSED" && unit.status != "MASTERED")
         .or_else(|| units.last())
         .ok_or_else(|| {
+            debug!("roadmap contains no units to resume");
             AppError::new(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "ROADMAP_EMPTY",
                 "roadmap must contain at least one unit",
             )
         })?;
+
+    debug!(
+        user_id = %user.subject,
+        resume_unit_id = %resume_unit.unit_id,
+        total_units = units.len(),
+        "calculated progress overview"
+    );
 
     Ok(Json(ProgressOverviewResponse {
         resume_unit_id: resume_unit.unit_id.clone(),
@@ -430,10 +495,12 @@ async fn progress_overview(
 }
 
 async fn unit_by_id(Path(unit_id): Path<String>) -> AppResult<Json<UnitResponse>> {
+    info!(unit_id = %unit_id, "get unit by ID API hit");
     let valid_unit_id = unit_id
         .chars()
         .all(|value| value.is_ascii_lowercase() || value == '-');
     if !valid_unit_id {
+        debug!(unit_id = %unit_id, "invalid unit ID character format");
         return Err(AppError::new(
             StatusCode::BAD_REQUEST,
             "UNIT_INVALID_ID",
@@ -441,9 +508,16 @@ async fn unit_by_id(Path(unit_id): Path<String>) -> AppResult<Json<UnitResponse>
         ));
     }
 
+    debug!(unit_id = %unit_id, "loading unit and exercise definition files");
     let unit = load_unit_file_by_slug(&unit_id).await?;
     let exercise = load_exercise_file_by_slug(&unit_id).await?;
     if unit.exercise_id != exercise.id {
+        debug!(
+            unit_id = %unit_id,
+            unit_exercise_id = %unit.exercise_id,
+            exercise_id = %exercise.id,
+            "unit and exercise ID mismatch"
+        );
         return Err(AppError::new(
             StatusCode::INTERNAL_SERVER_ERROR,
             "EXERCISE_MISMATCH",
@@ -451,9 +525,16 @@ async fn unit_by_id(Path(unit_id): Path<String>) -> AppResult<Json<UnitResponse>
         ));
     }
 
+    debug!(
+        unit_id = %unit_id,
+        template_path = %exercise.template_path,
+        starter_file = %exercise.starter_file,
+        "resolving template root and starter file"
+    );
     let template_root = tokio::fs::canonicalize(&exercise.template_path)
         .await
-        .map_err(|_| {
+        .map_err(|error| {
+            debug!(%error, template_path = %exercise.template_path, "failed to canonicalize template path");
             AppError::new(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "EXERCISE_READ_FAILED",
@@ -461,7 +542,8 @@ async fn unit_by_id(Path(unit_id): Path<String>) -> AppResult<Json<UnitResponse>
             )
         })?;
     let starter_path = template_root.join(&exercise.starter_file);
-    let starter_path = tokio::fs::canonicalize(starter_path).await.map_err(|_| {
+    let starter_path = tokio::fs::canonicalize(starter_path).await.map_err(|error| {
+        debug!(%error, "failed to canonicalize starter file path");
         AppError::new(
             StatusCode::INTERNAL_SERVER_ERROR,
             "EXERCISE_READ_FAILED",
@@ -469,13 +551,15 @@ async fn unit_by_id(Path(unit_id): Path<String>) -> AppResult<Json<UnitResponse>
         )
     })?;
     if !starter_path.starts_with(&template_root) {
+        debug!(starter_path = ?starter_path, template_root = ?template_root, "starter path escaped template root");
         return Err(AppError::new(
             StatusCode::INTERNAL_SERVER_ERROR,
             "EXERCISE_INVALID_PATH",
             "invalid exercise starter path",
         ));
     }
-    let starter_code = tokio::fs::read_to_string(starter_path).await.map_err(|_| {
+    let starter_code = tokio::fs::read_to_string(starter_path).await.map_err(|error| {
+        debug!(%error, "failed to read starter code file");
         AppError::new(
             StatusCode::INTERNAL_SERVER_ERROR,
             "EXERCISE_READ_FAILED",
@@ -483,6 +567,7 @@ async fn unit_by_id(Path(unit_id): Path<String>) -> AppResult<Json<UnitResponse>
         )
     })?;
 
+    debug!(unit_id = %unit_id, "successfully loaded unit and starter code");
     Ok(Json(UnitResponse {
         id: unit.id,
         title: unit.title,
@@ -520,9 +605,11 @@ fn content_root() -> PathBuf {
 
 async fn load_foundations_roadmap() -> AppResult<LoadedRoadmap> {
     let roadmap_path = content_root().join("roadmaps/foundations.json");
+    debug!(path = ?roadmap_path, "reading foundations roadmap file");
     let roadmap_data = tokio::fs::read_to_string(&roadmap_path)
         .await
         .map_err(|error| {
+            debug!(%error, path = ?roadmap_path, "failed to read roadmap file");
             if error.kind() == ErrorKind::NotFound {
                 return AppError::new(
                     StatusCode::NOT_FOUND,
@@ -537,7 +624,8 @@ async fn load_foundations_roadmap() -> AppResult<LoadedRoadmap> {
                 "failed to load roadmap",
             )
         })?;
-    let roadmap: RoadmapFile = serde_json::from_str(&roadmap_data).map_err(|_| {
+    let roadmap: RoadmapFile = serde_json::from_str(&roadmap_data).map_err(|error| {
+        debug!(%error, "failed to parse roadmap json");
         AppError::new(
             StatusCode::INTERNAL_SERVER_ERROR,
             "ROADMAP_PARSE_FAILED",
@@ -553,6 +641,7 @@ async fn load_foundations_roadmap() -> AppResult<LoadedRoadmap> {
                 .split('.')
                 .nth(2)
                 .ok_or_else(|| {
+                    debug!(unit_id = %unit_id, "failed to derive slug from unit ID");
                     AppError::new(
                         StatusCode::INTERNAL_SERVER_ERROR,
                         "UNIT_INVALID_ID",
@@ -580,9 +669,11 @@ async fn load_foundations_roadmap() -> AppResult<LoadedRoadmap> {
 
 async fn load_unit_file_by_slug(unit_slug: &str) -> AppResult<UnitFile> {
     let unit_path = content_root().join(format!("units/{unit_slug}.json"));
+    debug!(slug = %unit_slug, path = ?unit_path, "reading unit definition file");
     let unit_data = tokio::fs::read_to_string(&unit_path)
         .await
         .map_err(|error| {
+            debug!(%error, path = ?unit_path, "failed to read unit file");
             if error.kind() == ErrorKind::NotFound {
                 return AppError::new(StatusCode::NOT_FOUND, "UNIT_NOT_FOUND", "unit not found");
             }
@@ -594,7 +685,8 @@ async fn load_unit_file_by_slug(unit_slug: &str) -> AppResult<UnitFile> {
             )
         })?;
 
-    serde_json::from_str(&unit_data).map_err(|_| {
+    serde_json::from_str(&unit_data).map_err(|error| {
+        debug!(%error, slug = %unit_slug, "failed to parse unit JSON");
         AppError::new(
             StatusCode::INTERNAL_SERVER_ERROR,
             "UNIT_PARSE_FAILED",
@@ -605,9 +697,11 @@ async fn load_unit_file_by_slug(unit_slug: &str) -> AppResult<UnitFile> {
 
 async fn load_exercise_file_by_slug(unit_slug: &str) -> AppResult<ExerciseFile> {
     let exercise_path = content_root().join(format!("exercises/{unit_slug}.json"));
+    debug!(slug = %unit_slug, path = ?exercise_path, "reading exercise definition file");
     let exercise_data = tokio::fs::read_to_string(&exercise_path)
         .await
         .map_err(|error| {
+            debug!(%error, path = ?exercise_path, "failed to read exercise file");
             if error.kind() == ErrorKind::NotFound {
                 return AppError::new(
                     StatusCode::NOT_FOUND,
@@ -623,7 +717,8 @@ async fn load_exercise_file_by_slug(unit_slug: &str) -> AppResult<ExerciseFile> 
             )
         })?;
 
-    serde_json::from_str(&exercise_data).map_err(|_| {
+    serde_json::from_str(&exercise_data).map_err(|error| {
+        debug!(%error, slug = %unit_slug, "failed to parse exercise JSON");
         AppError::new(
             StatusCode::INTERNAL_SERVER_ERROR,
             "EXERCISE_PARSE_FAILED",
@@ -638,6 +733,7 @@ async fn process_attempt(
     exercise_id: String,
     code: String,
 ) -> anyhow::Result<()> {
+    debug!(attempt_id = %attempt_id, "setting attempt status to RUNNING");
     sqlx::query("UPDATE attempts SET status = 'RUNNING', updated_at = NOW() WHERE id = $1")
         .bind(attempt_id)
         .execute(&state.db)
@@ -647,6 +743,11 @@ async fn process_attempt(
         error!(%error, attempt_id = %attempt_id, "failed to record running progress");
     }
 
+    debug!(
+        attempt_id = %attempt_id,
+        exercise_id = %exercise_id,
+        "dispatching attempt execution to executor client"
+    );
     let result = execute_submission(
         &state.http_client,
         &state.config.executor_base_url,
@@ -660,6 +761,12 @@ async fn process_attempt(
 
     match result {
         Ok(executor_result) => {
+            debug!(
+                attempt_id = %attempt_id,
+                status = %executor_result.status,
+                duration_ms = executor_result.duration_ms,
+                "executor returned execution result"
+            );
             sqlx::query(
                 r#"
                 UPDATE attempts
@@ -678,6 +785,7 @@ async fn process_attempt(
             update_progress(&state, attempt_id).await?;
         }
         Err(error) => {
+            debug!(attempt_id = %attempt_id, %error, "executor execution failed with error");
             sqlx::query(
                 "UPDATE attempts SET status = 'ERROR', stderr = $2, updated_at = NOW() WHERE id = $1",
             )
@@ -692,6 +800,7 @@ async fn process_attempt(
 }
 
 async fn update_progress(state: &AppState, attempt_id: Uuid) -> anyhow::Result<()> {
+    debug!(attempt_id = %attempt_id, "querying attempt to update progress");
     let row = sqlx::query("SELECT user_id, status, exercise_id FROM attempts WHERE id = $1")
         .bind(attempt_id)
         .fetch_one(&state.db)
@@ -703,6 +812,14 @@ async fn update_progress(state: &AppState, attempt_id: Uuid) -> anyhow::Result<(
     let unit_id = load_unit_id_for_exercise(&exercise_id).await?;
 
     let progress_status = progress_status_for_attempt(&attempt_status);
+    debug!(
+        attempt_id = %attempt_id,
+        user_id = %user_id,
+        unit_id = %unit_id,
+        attempt_status = %attempt_status,
+        progress_status = %progress_status,
+        "upserting progress record"
+    );
 
     sqlx::query(
         r#"
@@ -727,6 +844,7 @@ async fn update_progress(state: &AppState, attempt_id: Uuid) -> anyhow::Result<(
 }
 
 async fn load_unit_id_for_exercise(exercise_id: &str) -> anyhow::Result<String> {
+    debug!(exercise_id = %exercise_id, "searching units directory for exercise ID");
     let mut unit_entries = tokio::fs::read_dir(content_root().join("units")).await?;
 
     while let Some(entry) = unit_entries.next_entry().await? {
@@ -738,10 +856,12 @@ async fn load_unit_id_for_exercise(exercise_id: &str) -> anyhow::Result<String> 
         let unit_data = tokio::fs::read_to_string(path).await?;
         let unit: UnitExerciseIndex = serde_json::from_str(&unit_data)?;
         if unit.exercise_id == exercise_id {
+            debug!(exercise_id = %exercise_id, unit_id = %unit.id, "found unit for exercise");
             return Ok(unit.id);
         }
     }
 
+    debug!(exercise_id = %exercise_id, "no matching unit found for exercise");
     anyhow::bail!("unsupported exercise_id: {exercise_id}")
 }
 
@@ -749,7 +869,17 @@ async fn request_id_middleware(request: Request<axum::body::Body>, next: Next) -
     let request_id = Uuid::new_v4().to_string();
     let method = request.method().clone();
     let path = request.uri().path().to_string();
+
+    info!(
+        request_id = %request_id,
+        method = %method,
+        path = %path,
+        "incoming API request"
+    );
+
+    let start = std::time::Instant::now();
     let mut response = next.run(request).await;
+    let duration_ms = start.elapsed().as_millis() as u64;
 
     response.headers_mut().insert(
         "x-request-id",
@@ -762,22 +892,31 @@ async fn request_id_middleware(request: Request<axum::body::Body>, next: Next) -
         method = %method,
         path = %path,
         status = %response.status(),
-        "request handled"
+        duration_ms = duration_ms,
+        "API request handled"
     );
 
     response
 }
 
 fn ensure_role(user: &AuthenticatedUser, allowed_roles: &[&str]) -> AppResult<()> {
+    debug!(
+        user = %user.subject,
+        user_roles = ?user.roles,
+        allowed_roles = ?allowed_roles,
+        "checking user role authorization"
+    );
     let has_role = user
         .roles
         .iter()
         .any(|role| allowed_roles.iter().any(|allowed| role == allowed));
 
     if has_role {
+        debug!(user = %user.subject, "authorization granted");
         return Ok(());
     }
 
+    debug!(user = %user.subject, "authorization denied: insufficient role permissions");
     Err(AppError::new(
         StatusCode::FORBIDDEN,
         "AUTH_FORBIDDEN",
@@ -794,6 +933,8 @@ fn progress_status_for_attempt(attempt_status: &str) -> &'static str {
 }
 
 pub async fn not_found() -> Response {
+    info!("not found fallback route hit");
+    debug!("returning 404 response");
     (
         StatusCode::NOT_FOUND,
         Json(serde_json::json!({
