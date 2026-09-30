@@ -28,4 +28,4 @@
 
 ## Next planned tasks
 
-- Plan and implement the Structs curriculum slice described in [next-learning-slices.md](next-learning-slices.md), including its exercise, roadmap ordering, executor mapping, and learner-flow coverage.
+- Implemented the Structs curriculum slice with its exercise, roadmap ordering, executor mapping, and learner-flow coverage.

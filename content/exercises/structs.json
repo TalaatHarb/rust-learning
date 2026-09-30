@@ -1,0 +1,13 @@
+{
+  "id": "exercise.rust.structs.build-profile.v1",
+  "version": 1,
+  "title": "Build a learner profile",
+  "starter_file": "src/lib.rs",
+  "template_path": "content/exercises/structs/v1/template",
+  "expected_solution_file": "src/lib.solution.rs",
+  "hints": [
+    "Define `Profile` with public `name` and `age` fields and a private `display_name` field.",
+    "Initialize `display_name` from the name, using `\"Anonymous\"` when the name is empty.",
+    "Implement `summary` with `&self` so it can read the fields without taking ownership."
+  ]
+}

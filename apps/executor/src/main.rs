@@ -238,6 +238,9 @@ fn map_template_path(exercise_id: &str) -> anyhow::Result<&'static Path> {
         "exercise.rust.modules.public-api.v1" => {
             Ok(Path::new("content/exercises/modules/v1/template"))
         }
+        "exercise.rust.structs.build-profile.v1" => {
+            Ok(Path::new("content/exercises/structs/v1/template"))
+        }
         _ => anyhow::bail!("unsupported exercise_id: {exercise_id}"),
     }
 }
