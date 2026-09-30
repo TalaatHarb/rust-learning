@@ -25,7 +25,8 @@
 - [x] Completed the local Keycloak learner profile so the seeded account can authenticate.
 - [x] Documented the test database configuration and ran the full MVP smoke flow and validation.
 - [x] Implemented the Types, Pattern Matching, and Modules learning slices with exercises, roadmap ordering, executor mappings, and API progress coverage.
+- [x] Implemented the Structs curriculum slice with its exercise, roadmap ordering, executor mapping, and learner-flow coverage.
 
 ## Next planned tasks
 
-- Implemented the Structs curriculum slice with its exercise, roadmap ordering, executor mapping, and learner-flow coverage.
+- Implement the Collections curriculum slice with its exercise, roadmap ordering, executor mapping, and learner-flow coverage.

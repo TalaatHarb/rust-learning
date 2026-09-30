@@ -1,6 +1,6 @@
 # Next Learning Slices
 
-This plan sequences the next Rust Foundations unit after **Modules**. Each slice should be delivered end to end: curriculum content, runnable exercise, roadmap integration, executor support, and learner-flow verification.
+This plan records the Rust Foundations sequence through **Structs** and plans the next units after it. Each slice should be delivered end to end: curriculum content, runnable exercise, roadmap integration, executor support, and learner-flow verification.
 
 ## Shared implementation requirements
 
@@ -110,6 +110,106 @@ The exercise should build a small profile struct, expose a method that derives o
 - The exercise demonstrates methods and a meaningful public/private field boundary.
 - The expected solution passes its tests, including the boundary case, and the starter provides a clear compiling scaffold.
 
+## 5. Collections
+
+- **Slug:** `collections`
+- **Prerequisite:** `unit.rust.structs.v1`
+- **Content IDs:** `unit.rust.collections.v1`; `exercise.rust.collections.record-index.v1`
+
+### Learning outcomes
+
+- Distinguish owned `String` values from string slices and choose between them for common tasks.
+- Create, update, and read values from a `Vec`.
+- Store and look up keyed values with a `HashMap`.
+- Choose an appropriate collection for a small data-management task.
+
+### Lesson and exercise scope
+
+Introduce `String` and `Vec` as owned, growable collections, then demonstrate the basic insert, access, and iteration operations for vectors and maps. Explain lookup behavior for missing map keys and keep collection internals, advanced iterator patterns, and performance analysis out of scope.
+
+The exercise should build and query a small collection of records, using `Vec` to hold the records and `HashMap` to index them, with strings for record data. Tests should cover ordinary insert/query behavior, multiple records, and a missing key or empty collection.
+
+### Completion checks
+
+- The learner can explain when to use `String`, `Vec`, and `HashMap` in the exercise.
+- The exercise builds and queries more than one record and tests a missing or empty case.
+- The starter compiles, and the expected solution passes the exercise tests.
+
+## 6. Error Handling
+
+- **Slug:** `error-handling`
+- **Prerequisite:** `unit.rust.collections.v1`
+- **Content IDs:** `unit.rust.error-handling.v1`; `exercise.rust.error-handling.parse-record.v1`
+
+### Learning outcomes
+
+- Represent an optional value with `Option` and handle both `Some` and `None`.
+- Represent success or failure with `Result` and provide useful error information.
+- Propagate compatible errors with the `?` operator.
+- Distinguish recoverable errors from situations that should cause a panic.
+
+### Lesson and exercise scope
+
+Introduce `Option` and `Result` by examining operations that may have no value or may fail, then demonstrate matching, returning an error, and propagating it with `?`. Keep custom error types and broader error-handling libraries out of scope.
+
+The exercise should parse a small record from input that may be absent or invalid, returning a `Result` and using `?` to propagate a parsing failure. Tests should cover valid input, missing input, and malformed input without panicking.
+
+### Completion checks
+
+- The learner can choose between `Option` and `Result` based on whether there is an error to report.
+- The exercise handles missing and invalid input as explicit outcomes and demonstrates `?`.
+- The starter compiles, and the expected solution passes all success and failure cases.
+
+## 7. Generics and Traits
+
+- **Slug:** `generics-traits`
+- **Prerequisite:** `unit.rust.error-handling.v1`
+- **Content IDs:** `unit.rust.generics-traits.v1`; `exercise.rust.generics-traits.reusable-summary.v1`
+
+### Learning outcomes
+
+- Write a generic function or type that works with more than one concrete type.
+- Define and implement a trait to describe shared behavior.
+- Use a trait bound to require behavior from a generic parameter.
+- Recognize how generics and traits enable reuse while preserving compile-time checks.
+
+### Lesson and exercise scope
+
+Introduce a generic function and a simple generic type, then define a trait, implement it for multiple types, and use a trait bound in a reusable function. Keep lifetimes, associated types, blanket implementations, and advanced trait features out of scope.
+
+The exercise should implement reusable behavior over multiple types using a generic type or function and a small trait bound. Tests should verify the same operation for at least two distinct types and include a simple boundary case.
+
+### Completion checks
+
+- The learner can identify the generic parameter and explain what behavior the trait bound requires.
+- The exercise demonstrates one shared operation with at least two type implementations.
+- The starter compiles, and the expected solution passes all type-specific tests.
+
+## 8. Closures and Iterators
+
+- **Slug:** `closures-iterators`
+- **Prerequisite:** `unit.rust.generics-traits.v1`
+- **Content IDs:** `unit.rust.closures-iterators.v1`; `exercise.rust.closures-iterators.filter-transform.v1`
+
+### Learning outcomes
+
+- Recognize closure syntax and use a closure where a function-like value is expected.
+- Create an iterator from a collection and apply common transformations.
+- Filter and transform values with iterator adapters, then collect or aggregate the result.
+- Explain that iterator adapters are lazy until consumed.
+
+### Lesson and exercise scope
+
+Introduce closure parameters and return expressions, then demonstrate `iter`, `filter`, `map`, and a consuming operation such as `collect` or `sum`. Keep custom iterator implementations, complex closure capture, and advanced iterator combinators out of scope.
+
+The exercise should filter a collection of records or values and transform the matching items into a result collection or aggregate. Tests should cover matching and non-matching values, an empty input, and preservation of the expected order where relevant.
+
+### Completion checks
+
+- The learner can explain which operations filter values, transform values, and consume an iterator.
+- The exercise demonstrates a closure-based filter and transformation over a collection.
+- The starter compiles, and the expected solution passes ordinary and empty-input tests.
+
 ## Integration and release of the sequence
 
-After the unit is implemented, verify that it appears after its prerequisite in the Foundations roadmap, loads through the existing unit/exercise flow, and can be submitted and reflected in learner progress. Add the exercise ID to the executor template mapping and cover submission/progress behavior with the existing API integration-test patterns. Check the full roadmap ordering and prerequisite graph, then run `npm run content:validate` and `npm run validate`; complete the MVP smoke-flow checks when the test database is available.
+For each unit, verify that it appears after its prerequisite in the Foundations roadmap, loads through the existing unit/exercise flow, and can be submitted and reflected in learner progress. Add the exercise ID to the executor template mapping and cover submission/progress behavior with the existing API integration-test patterns. Check the full roadmap ordering and prerequisite graph, then run `npm run content:validate` and `npm run validate`; complete the MVP smoke-flow checks when the test database is available.
