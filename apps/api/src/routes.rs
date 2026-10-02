@@ -1111,6 +1111,7 @@ mod tests {
         let config = Config {
             host: "127.0.0.1".to_string(),
             port: 0,
+            allowed_origins: vec!["http://localhost:5173".to_string()],
             database_url,
             executor_base_url,
             jwt_issuer: "test-issuer".to_string(),

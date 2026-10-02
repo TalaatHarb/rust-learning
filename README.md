@@ -84,6 +84,7 @@ The API and executor read their configuration from environment variables. Each v
 | --- | --- | --- |
 | `API_HOST` | `0.0.0.0` | Address the API listens on. |
 | `API_PORT` | `8080` | Port the API listens on. |
+| `API_ALLOWED_ORIGINS` | `http://localhost:5173` | Comma-separated browser origins allowed to call the API. |
 | `DATABASE_URL` | `postgres://rust_learning:rust_learning@localhost:5432/rust_learning` | PostgreSQL connection URL. Configure this as a full URL, including host, port, database, and credentials. |
 | `EXECUTOR_BASE_URL` | `http://127.0.0.1:8082` | Base URL used by the API to contact the executor. |
 | `JWT_ISSUER` | `http://localhost:8081/realms/nextechincubator` | Expected JWT issuer; set this to your Keycloak realm issuer. |

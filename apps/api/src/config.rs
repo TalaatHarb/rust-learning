@@ -4,6 +4,7 @@ use std::env;
 pub struct Config {
     pub host: String,
     pub port: u16,
+    pub allowed_origins: Vec<String>,
     pub database_url: String,
     pub executor_base_url: String,
     pub jwt_issuer: String,
@@ -19,6 +20,18 @@ impl Config {
             .ok()
             .and_then(|value| value.parse::<u16>().ok())
             .unwrap_or(8080);
+        let allowed_origins = env::var("API_ALLOWED_ORIGINS")
+            .ok()
+            .map(|value| {
+                value
+                    .split(',')
+                    .map(str::trim)
+                    .filter(|origin| !origin.is_empty())
+                    .map(str::to_string)
+                    .collect::<Vec<_>>()
+            })
+            .filter(|origins| !origins.is_empty())
+            .unwrap_or_else(|| vec!["http://localhost:5173".to_string()]);
 
         let database_url = env::var("DATABASE_URL").unwrap_or_else(|_| {
             format!(
@@ -42,6 +55,7 @@ impl Config {
         Self {
             host,
             port,
+            allowed_origins,
             database_url,
             executor_base_url,
             jwt_issuer,
