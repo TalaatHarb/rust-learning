@@ -102,6 +102,8 @@ The API and executor read their configuration from environment variables. Each v
 | `EXECUTOR_OUTPUT_LIMIT_BYTES` | `20000` | Maximum captured output size per command stream. |
 | `EXECUTOR_WORKDIR_ROOT` | `/tmp/rust-learning-executor` | Root directory for temporary exercise workspaces. |
 
+The executor container must ship with the Rust toolchain because it runs `cargo check` and `cargo test` for learner submissions at request time.
+
 For example, configure and start the API in PowerShell:
 
 ```powershell
