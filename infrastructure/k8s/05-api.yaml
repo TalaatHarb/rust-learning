@@ -38,7 +38,7 @@ spec:
             - name: JWT_AUDIENCE
               value: "rust-learning-web"
             - name: JWT_JWKS_URL
-              value: "https://uaa.nextechincubator.com/realms/nextechincubator/protocol/openid-connect/certs"
+              value: "http://keycloak.rust-learning.svc.cluster.local:8080/realms/nextechincubator/protocol/openid-connect/certs"
             - name: RUST_LOG
               value: "info"
           readinessProbe:

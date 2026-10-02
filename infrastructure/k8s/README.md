@@ -10,6 +10,8 @@ This directory contains manifests for deploying all components to Kubernetes in 
 - **Database (PostgreSQL 16):** `postgres.rust-learning.svc.cluster.local:5432` (StatefulSet with hostPath backed PV)
 - **Executor (Worker):** `executor.rust-learning.svc.cluster.local:8082` (Internal Service)
 
+For the API JWT validator, keep `JWT_ISSUER` pointed at the public realm URL so it matches the token `iss` claim, but point `JWT_JWKS_URL` at the internal Keycloak service URL to avoid ingress/TLS trust issues from inside the cluster.
+
 ## Prerequisites
 
 - Ingress controller with `ingressClassName: nginx`
