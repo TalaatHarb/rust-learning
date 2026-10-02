@@ -1,30 +1,30 @@
 {
   "id": "unit.rust.pattern-matching.v1",
   "version": 1,
-  "title": "Rust Pattern Matching",
+  "title": "Pattern Matching (Part 1) - Enum variants",
   "learning_objectives": [
-    "Define enums with simple and data-bearing variants.",
-    "Use exhaustive match expressions to handle every enum variant.",
-    "Destructure carried values and use catch-all or guarded patterns when appropriate."
+    "Define an enum with both simple and data-carrying variants.",
+    "Use a `match` expression that handles every variant.",
+    "Destructure carried values inside match arms to build a response."
   ],
   "prerequisite_unit_ids": [
     "unit.rust.types.v1"
   ],
-  "explanation": "Patterns let Rust inspect and unpack values. A match expression must account for every possible enum variant, so adding a new variant reveals places that need new handling instead of leaving cases unhandled.",
+  "explanation": "This slice introduces pattern matching through a single enum. The key idea is that `match` is exhaustive: every variant must be handled, and any data carried by a variant can be unpacked right inside the arm that handles it.",
   "examples": [
     {
       "id": "example.signal-enum",
-      "title": "Define data-bearing variants",
+      "title": "Define enum variants with attached data",
       "code": "enum Signal {\n    Quit,\n    Move { x: i32, y: i32 },\n    Write(String),\n}"
     },
     {
       "id": "example.exhaustive-match",
-      "title": "Destructure every variant",
+      "title": "Match and destructure every variant",
       "code": "fn describe(signal: Signal) -> String {\n    match signal {\n        Signal::Quit => String::from(\"quit\"),\n        Signal::Move { x, y } => format!(\"move to {x}, {y}\"),\n        Signal::Write(text) => format!(\"write: {text}\"),\n    }\n}"
     },
     {
       "id": "example.guard-pattern",
-      "title": "Use a match guard",
+      "title": "Compare with a guarded integer match",
       "code": "fn classify(value: i32) -> &'static str {\n    match value {\n        number if number < 0 => \"negative\",\n        0 => \"zero\",\n        _ => \"positive\",\n    }\n}"
     }
   ],
@@ -34,7 +34,7 @@
   "exercise_id": "exercise.rust.pattern-matching.classify-value.v1",
   "completion_criteria": [
     "Exercise tests cover every enum variant, including variants with carried data",
-    "Learner can explain why a match must handle every enum variant",
-    "Learner can identify values destructured by the match arms"
+    "Learner can explain why the compiler rejects a non-exhaustive match",
+    "Learner can identify which values are destructured in each match arm"
   ]
 }

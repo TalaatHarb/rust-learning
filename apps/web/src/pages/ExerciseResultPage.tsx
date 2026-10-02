@@ -6,6 +6,11 @@ import { fetchAttempt } from '../lib/api'
 
 type ResultTone = 'success' | 'active' | 'warning' | 'error' | 'neutral'
 
+function unitSlugFromExerciseId(exerciseId: string) {
+  const parts = exerciseId.split('.')
+  return parts.length >= 3 ? parts[2] : null
+}
+
 function formatAttemptStatus(status: string) {
   switch (status) {
     case 'PASSED':
@@ -91,6 +96,7 @@ export function ExerciseResultPage() {
   const formattedStatus = formatAttemptStatus(attempt.status)
   const hasStdout = attempt.stdout.trim().length > 0
   const hasStderr = attempt.stderr.trim().length > 0
+  const retryUnitSlug = attempt.status === 'FAILED' ? unitSlugFromExerciseId(attempt.exercise_id) : null
 
   return (
     <div className="result-page">
@@ -104,6 +110,11 @@ export function ExerciseResultPage() {
           </p>
         </div>
         <div className="roadmap-hero__actions">
+          {retryUnitSlug ? (
+            <Link className="inline-link roadmap-hero__cta" to={`/exercise/${retryUnitSlug}`}>
+              Retry exercise
+            </Link>
+          ) : null}
           <Link className="inline-link roadmap-hero__cta" to="/progress">
             View progress
           </Link>
@@ -149,6 +160,11 @@ export function ExerciseResultPage() {
             failures separately.
           </p>
           <div className="dashboard-card__actions">
+            {retryUnitSlug ? (
+              <Link className="inline-link" to={`/exercise/${retryUnitSlug}`}>
+                Retry exercise
+              </Link>
+            ) : null}
             <Link className="inline-link" to="/roadmap">
               Back to roadmap
             </Link>

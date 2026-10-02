@@ -163,6 +163,8 @@ for (const [unitId, { unit }] of unitFiles.entries()) {
   const starterSource = readFileSync(starterPath, 'utf-8')
   const solutionSource = readFileSync(expectedSolutionPath, 'utf-8')
 
+  assert(starterSource.trim().length > 0, `Starter file must not be empty: ${starterPath}`)
+
   try {
     writeFileSync(starterPath, solutionSource)
     const cargoTest = spawnSync('cargo', ['test', '--quiet'], {

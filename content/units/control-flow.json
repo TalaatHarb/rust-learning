@@ -1,26 +1,26 @@
 {
   "id": "unit.rust.control-flow.v1",
   "version": 1,
-  "title": "Rust Control Flow",
+  "title": "Control Flow (Part 1) - `if`/`else` expressions",
   "learning_objectives": [
-    "Use `if` and `else` expressions to branch on conditions.",
-    "Return values from control-flow expressions.",
-    "Read branch-related type mismatch compiler errors."
+    "Use `if`, `else if`, and `else` to branch on conditions.",
+    "Return values from each branch of an `if` expression.",
+    "Recognize why every branch must produce the same type."
   ],
   "prerequisite_unit_ids": [
     "unit.rust.functions.v1"
   ],
-  "explanation": "Rust control flow uses expressions, so `if` branches can produce values as long as every branch returns the same type.",
+  "explanation": "This slice focuses on `if` expressions rather than the whole control-flow toolbox. In Rust, branching can produce a value, so each branch must agree on the return type and cover the cases the function cares about.",
   "examples": [
     {
       "id": "example.if-expression",
-      "title": "Choosing a label",
+      "title": "Choose a label with `if` and `else`",
       "code": "fn describe(score: i32) -> &'static str {\n    if score >= 50 {\n        \"pass\"\n    } else {\n        \"retry\"\n    }\n}"
     },
     {
-      "id": "example.match-expression",
-      "title": "Simple match",
-      "code": "fn describe_day(day: u8) -> &'static str {\n    match day {\n        0 | 6 => \"weekend\",\n        _ => \"weekday\",\n    }\n}"
+      "id": "example.else-if-chain",
+      "title": "Handle three outcomes with `else if`",
+      "code": "fn classify(value: i32) -> &'static str {\n    if value < 0 {\n        \"negative\"\n    } else if value == 0 {\n        \"zero\"\n    } else {\n        \"positive\"\n    }\n}"
     }
   ],
   "compiler_error_examples": [
@@ -28,7 +28,7 @@
   ],
   "exercise_id": "exercise.rust.control-flow.classify-number.v1",
   "completion_criteria": [
-    "Exercise tests pass",
-    "Learner can explain why both branches must return the same type"
+    "Exercise tests pass for negative, zero, and positive inputs",
+    "Learner can explain why every `if` branch in the function returns the same kind of value"
   ]
 }

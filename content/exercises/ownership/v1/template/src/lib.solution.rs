@@ -1,6 +1,5 @@
-pub fn print_twice(message: String) -> (String, String) {
-    let borrowed = message.as_str();
-    (borrowed.to_string(), borrowed.to_string())
+pub fn print_twice(message: &str) -> (String, String) {
+    (message.to_string(), message.to_string())
 }
 
 #[cfg(test)]
@@ -10,7 +9,7 @@ mod tests {
     #[test]
     fn returns_same_message_twice() {
         let value = String::from("hello");
-        let (first, second) = print_twice(value.clone());
+        let (first, second) = print_twice(&value);
 
         assert_eq!(first, "hello");
         assert_eq!(second, "hello");

@@ -1,23 +1,23 @@
 {
   "id": "unit.rust.variables.v1",
   "version": 1,
-  "title": "Rust Variables",
+  "title": "Variables (Part 1) - Mutable bindings",
   "learning_objectives": [
-    "Distinguish immutable and mutable variable bindings.",
-    "Use `mut` when changing variable values.",
-    "Read compiler errors for invalid mutation attempts."
+    "Distinguish Rust's default immutable bindings from mutable ones.",
+    "Add `mut` when a binding must change over time.",
+    "Interpret compiler feedback for invalid reassignment."
   ],
   "prerequisite_unit_ids": [],
-  "explanation": "Variables are immutable by default in Rust. Use `mut` when a value must change over time.",
+  "explanation": "This slice focuses on one core rule: bindings are immutable by default. When a value needs to change, mark the binding with `mut` so the compiler knows reassignment is intentional.",
   "examples": [
     {
       "id": "example.immutable-binding",
-      "title": "Immutable by default",
+      "title": "Immutable bindings reject reassignment",
       "code": "fn main() {\n    let x = 5;\n    // x = 6; // cannot assign twice to immutable variable\n    println!(\"{x}\");\n}"
     },
     {
       "id": "example.mutable-binding",
-      "title": "Mutable binding",
+      "title": "Mutable bindings allow counters to change",
       "code": "fn main() {\n    let mut count = 0;\n    count += 1;\n    println!(\"{count}\");\n}"
     }
   ],
@@ -26,7 +26,7 @@
   ],
   "exercise_id": "exercise.rust.variables.mutable-counter.v1",
   "completion_criteria": [
-    "Exercise tests pass",
-    "Learner can explain when `mut` is required"
+    "Exercise tests pass for incrementing a mutable counter",
+    "Learner can explain why the binding, not just the value, must be mutable"
   ]
 }

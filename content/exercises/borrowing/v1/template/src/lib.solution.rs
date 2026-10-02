@@ -1,11 +1,9 @@
-pub fn longer_label(left: &str, right: &str) -> String {
-    let selected = if left.len() >= right.len() {
+pub fn longer_label<'a>(left: &'a str, right: &'a str) -> &'a str {
+    if left.len() >= right.len() {
         left
     } else {
         right
-    };
-
-    selected.to_string()
+    }
 }
 
 #[cfg(test)]

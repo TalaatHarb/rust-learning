@@ -67,7 +67,7 @@ export function ExercisePage() {
   }
 
   return (
-    <>
+    <div className="exercise-page">
       <section className="panel">
         <h2>Exercise</h2>
         <p>Implement the exercise and run tests.</p>
@@ -92,6 +92,6 @@ export function ExercisePage() {
           <p>{submissionError}</p>
         </section>
       )}
-    </>
+    </div>
   )
 }

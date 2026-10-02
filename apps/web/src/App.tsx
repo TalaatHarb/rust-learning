@@ -1,4 +1,5 @@
-import { NavLink, Route, Routes } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { useAuth } from 'react-oidc-context'
 import { DashboardPage } from './pages/DashboardPage'
 import { ExercisePage } from './pages/ExercisePage'
@@ -13,41 +14,66 @@ const navItems = [
   { to: '/roadmap', label: 'Roadmap' },
   { to: '/result/latest', label: 'Result' },
   { to: '/progress', label: 'Progress' },
-  { to: '/login', label: 'Login' },
 ]
 
 function App() {
   const auth = useAuth()
+  const location = useLocation()
+  const [isNavOpen, setIsNavOpen] = useState(false)
+  const navigationItems = auth.isAuthenticated
+    ? navItems
+    : [...navItems, { to: '/login', label: 'Login' }]
+
+  useEffect(() => {
+    setIsNavOpen(false)
+  }, [location.pathname])
 
   return (
     <div className="app-shell">
       <header className="topbar">
         <h1>Rust Learning Platform</h1>
-        <div className="auth-actions">
-          {auth.isAuthenticated ? (
-            <button type="button" onClick={() => void auth.signoutRedirect()}>
-              Logout
-            </button>
-          ) : (
-            <button type="button" onClick={() => void auth.signinRedirect()}>
-              Login
-            </button>
-          )}
+        <div className="topbar__controls">
+          <button
+            type="button"
+            className="menu-toggle"
+            aria-expanded={isNavOpen}
+            aria-controls="primary-navigation"
+            onClick={() => setIsNavOpen((value) => !value)}
+          >
+            {isNavOpen ? 'Close menu' : 'Menu'}
+          </button>
         </div>
       </header>
       <div className="layout">
-        <nav className="navigation" aria-label="Primary">
-          {navItems.map((item) => (
+        <nav
+          id="primary-navigation"
+          className={isNavOpen ? 'navigation navigation--open' : 'navigation'}
+          aria-label="Primary"
+        >
+          {navigationItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
                 isActive ? 'nav-link nav-link--active' : 'nav-link'
               }
+              onClick={() => setIsNavOpen(false)}
             >
               {item.label}
             </NavLink>
           ))}
+          {auth.isAuthenticated ? (
+            <button
+              type="button"
+              className="nav-link nav-button"
+              onClick={() => {
+                setIsNavOpen(false)
+                void auth.signoutRedirect()
+              }}
+            >
+              Logout
+            </button>
+          ) : null}
         </nav>
         <main className="content" aria-live="polite">
           <Routes>

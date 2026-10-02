@@ -1,30 +1,30 @@
 {
   "id": "unit.rust.types.v1",
   "version": 1,
-  "title": "Rust Types",
+  "title": "Types (Part 1) - Tuples and arrays",
   "learning_objectives": [
-    "Recognize common scalar types and how type inference uses surrounding code.",
-    "Use tuples and fixed-size arrays to group values.",
-    "Access and destructure compound values and choose appropriate numeric types."
+    "Read tuple and array types in a function signature.",
+    "Destructure a tuple into named values.",
+    "Convert array elements to a wider numeric type before summing them."
   ],
   "prerequisite_unit_ids": [
     "unit.rust.slices.v1"
   ],
-  "explanation": "Rust checks types at compile time. Inference can determine many types from how a value is used, while annotations clarify intent or resolve ambiguity. Tuples group values of different types, and arrays group a fixed number of values of the same type.",
+  "explanation": "This slice focuses on compound data types rather than Rust's full type system. The lesson uses a tuple and a fixed-size array together so the learner can practice destructuring, indexing, and explicit numeric conversion in one contained exercise.",
   "examples": [
     {
       "id": "example.scalar-types",
-      "title": "Scalar types and inference",
+      "title": "Read scalar annotations around compound values",
       "code": "let enabled: bool = true;\nlet initial = 'R';\nlet count: u32 = 3;\nlet ratio = 0.5_f64;"
     },
     {
       "id": "example.tuple-destructure",
-      "title": "Destructure a tuple",
+      "title": "Destructure the tuple into named fields",
       "code": "let measurement: (u8, bool) = (7, true);\nlet (level, active) = measurement;\nprintln!(\"level={level}, active={active}\");"
     },
     {
       "id": "example.fixed-array",
-      "title": "Access a fixed-size array",
+      "title": "Sum values from a fixed-size array",
       "code": "let samples: [i16; 3] = [4, 8, 12];\nlet first = samples[0];\nlet total: i32 = samples.iter().map(|sample| i32::from(*sample)).sum();"
     }
   ],
@@ -35,7 +35,7 @@
   "exercise_id": "exercise.rust.types.tuple-basics.v1",
   "completion_criteria": [
     "Exercise tests pass for ordinary and zero-valued inputs",
-    "Learner can identify the tuple, array, and scalar types used in the exercise",
-    "Learner can explain how an explicit annotation can resolve type ambiguity"
+    "Learner can identify which values come from the tuple and which come from the array",
+    "Learner can explain why the sum is accumulated as `i32` instead of `i16`"
   ]
 }

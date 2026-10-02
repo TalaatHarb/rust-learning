@@ -1,26 +1,26 @@
 {
   "id": "unit.rust.ownership.v1",
   "version": 1,
-  "title": "Rust Ownership",
+  "title": "Ownership (Part 1) - Moves and borrowed reads",
   "learning_objectives": [
-    "Explain move semantics and ownership transfer.",
-    "Use immutable references to avoid moving owned values.",
-    "Interpret common ownership compiler errors."
+    "Explain what it means for a `String` value to move into a function.",
+    "Use `&str` when a helper only needs to read text.",
+    "Recognize the compiler error caused by using a value after it has moved."
   ],
   "prerequisite_unit_ids": [
     "unit.rust.variables.v1",
     "unit.rust.functions.v1"
   ],
-  "explanation": "Ownership gives each value a single owner. Moves transfer ownership, while references allow temporary borrowing.",
+  "explanation": "This first ownership slice contrasts two choices: moving a `String` into a function or borrowing it for a read-only task. The goal is to understand why a borrowed `&str` keeps the original owner usable after the helper returns.",
   "examples": [
     {
       "id": "example.move-error",
-      "title": "Move error",
+      "title": "Passing ownership moves the value",
       "code": "fn main() {\n    let text = String::from(\"hello\");\n    consume(text);\n    // println!(\"{text}\"); // moved value\n}\n\nfn consume(data: String) {\n    println!(\"{data}\");\n}"
     },
     {
       "id": "example.borrow-fix",
-      "title": "Borrowing fix",
+      "title": "Borrow text for repeated reads",
       "code": "fn main() {\n    let text = String::from(\"hello\");\n    print_twice(&text);\n    println!(\"{text}\");\n}\n\nfn print_twice(data: &str) {\n    println!(\"{data}\");\n    println!(\"{data}\");\n}"
     }
   ],
@@ -29,7 +29,7 @@
   ],
   "exercise_id": "exercise.rust.ownership.print-twice.v1",
   "completion_criteria": [
-    "All exercise tests pass",
-    "Learner can explain why `&str` borrowing keeps ownership"
+    "Exercise tests pass while the original `String` remains usable",
+    "Learner can explain why borrowing `&str` avoids moving ownership into the helper"
   ]
 }

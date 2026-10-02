@@ -1,26 +1,26 @@
 {
   "id": "unit.rust.slices.v1",
   "version": 1,
-  "title": "Rust Slices",
+  "title": "Ownership (Part 4) - String slices",
   "learning_objectives": [
-    "Use string slices to view part of a string without copying.",
-    "Return borrowed views from helper functions.",
-    "Choose slices when only part of a collection is needed."
+    "Use `&str` slices to view part of a string without copying.",
+    "Return a borrowed substring from a helper function.",
+    "Explain why the returned slice must point at the original input."
   ],
   "prerequisite_unit_ids": [
     "unit.rust.references.v1"
   ],
-  "explanation": "Slices borrow a contiguous range from existing data. String slices are written as `&str` and avoid allocating new strings.",
+  "explanation": "This slice narrows ownership down to borrowed string ranges. A string slice lets a function hand back part of the original text without allocating a new `String`, as long as the returned view still points into the caller's input.",
   "examples": [
     {
       "id": "example.first-word",
-      "title": "Find the first word slice",
+      "title": "Return the first word as a slice",
       "code": "fn first_word(text: &str) -> &str {\n    match text.find(' ') {\n        Some(index) => &text[..index],\n        None => text,\n    }\n}"
     },
     {
-      "id": "example-array-slice",
-      "title": "Borrow part of an array",
-      "code": "fn first_pair(values: &[i32]) -> &[i32] {\n    &values[..2]\n}"
+      "id": "example.reuse-same-string",
+      "title": "Keep using the original string after slicing",
+      "code": "fn announce_first_word(text: &str) {\n    let first = first_word(text);\n    println!(\"first: {first}\");\n    println!(\"full: {text}\");\n}"
     }
   ],
   "compiler_error_examples": [
@@ -28,7 +28,7 @@
   ],
   "exercise_id": "exercise.rust.slices.first-word.v1",
   "completion_criteria": [
-    "Exercise tests pass",
-    "Learner can describe why a slice borrows data instead of owning it"
+    "Exercise tests pass by returning borrowed views for spaced and unspaced text",
+    "Learner can describe why a string slice borrows from the original input instead of owning new data"
   ]
 }

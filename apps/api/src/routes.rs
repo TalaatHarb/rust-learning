@@ -1033,7 +1033,9 @@ mod tests {
                 String::new(),
             ),
             "exercise.rust.ownership.print-twice.v1" => (
-                if payload.code.contains("message.as_str()") {
+                if payload.code.contains("print_twice(message: &str)")
+                    && payload.code.contains("message.to_string()")
+                {
                     "PASSED"
                 } else {
                     "FAILED"
@@ -1374,7 +1376,7 @@ mod tests {
                     .body(Body::from(
                         serde_json::json!({
                             "exercise_id": "exercise.rust.ownership.print-twice.v1",
-                            "code": "pub fn print_twice(message: String) -> (String, String) { let borrowed = message.as_str(); (borrowed.to_string(), borrowed.to_string()) }"
+                            "code": "pub fn print_twice(message: &str) -> (String, String) { (message.to_string(), message.to_string()) }"
                         })
                         .to_string(),
                     ))

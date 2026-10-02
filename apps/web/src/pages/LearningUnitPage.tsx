@@ -39,7 +39,7 @@ export function LearningUnitPage() {
   }
 
   return (
-    <>
+    <div className="lesson-page">
       <section className="panel">
         <h2>{data.title}</h2>
         {latestAttemptId && (
@@ -74,6 +74,6 @@ export function LearningUnitPage() {
           Start Exercise
         </Link>
       </div>
-    </>
+    </div>
   )
 }

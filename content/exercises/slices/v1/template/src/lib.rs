@@ -1,8 +1,6 @@
 pub fn first_word(text: &str) -> &str {
-    match text.find(' ') {
-        Some(index) => &text[..index],
-        None => text,
-    }
+    let _ = text;
+    ""
 }
 
 #[cfg(test)]

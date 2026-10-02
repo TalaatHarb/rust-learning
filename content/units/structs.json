@@ -1,31 +1,31 @@
 {
   "id": "unit.rust.structs.v1",
   "version": 1,
-  "title": "Rust Structs",
+  "title": "Structs (Part 1) - Named fields and methods",
   "learning_objectives": [
-    "Define named-field structs and choose appropriate field types.",
-    "Initialize structs and access or update their fields.",
-    "Add and call methods that operate on struct instances.",
-    "Distinguish public and private struct fields when designing a small API."
+    "Define a named-field struct with appropriate field types.",
+    "Construct a struct value and read its public fields.",
+    "Add a method that borrows `self` to build a summary string.",
+    "Distinguish public fields from private implementation details."
   ],
   "prerequisite_unit_ids": [
     "unit.rust.modules.v1"
   ],
-  "explanation": "Structs group related data into a named type. Named fields make the data readable, mutable fields can be updated when an instance is mutable, and methods provide behavior alongside the data. Visibility controls which fields callers can access directly.",
+  "explanation": "This slice introduces structs through one small profile type. The lesson combines construction, field visibility, and a borrowing method so the learner can see how data and behavior live together on a named type.",
   "examples": [
     {
       "id": "example.profile-struct",
-      "title": "Define and initialize a struct",
+      "title": "Define and construct a named-field struct",
       "code": "pub struct Profile {\n    pub name: String,\n    pub age: u8,\n}\n\nlet profile = Profile { name: String::from(\"Ada\"), age: 36 };"
     },
     {
       "id": "example.struct-method",
-      "title": "Add a method",
+      "title": "Add a borrowing method on the struct",
       "code": "impl Profile {\n    pub fn summary(&self) -> String {\n        format!(\"{} ({})\", self.name, self.age)\n    }\n}"
     },
     {
       "id": "example.private-field",
-      "title": "Keep implementation details private",
+      "title": "Keep one implementation detail private",
       "code": "pub struct Profile {\n    pub name: String,\n    display_name: String,\n}"
     }
   ],
@@ -35,8 +35,8 @@
   ],
   "exercise_id": "exercise.rust.structs.build-profile.v1",
   "completion_criteria": [
-    "Exercise tests cover profile construction, field access, method behavior, and an empty-name boundary case",
-    "Learner can explain how a method borrows a struct instance",
+    "Exercise tests cover construction, field access, method behavior, and an empty-name boundary case",
+    "Learner can explain why `summary(&self)` borrows the struct instead of consuming it",
     "Learner can identify why the private display field is not part of the public API"
   ]
 }

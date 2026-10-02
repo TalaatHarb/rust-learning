@@ -1,25 +1,25 @@
 {
   "id": "unit.rust.references.v1",
   "version": 1,
-  "title": "Rust References",
+  "title": "Ownership (Part 3) - Mutable references",
   "learning_objectives": [
-    "Use mutable references to update data in place.",
-    "Distinguish immutable and mutable references in function signatures.",
-    "Apply dereference-free mutation through `&mut` parameters."
+    "Use `&mut` parameters to update owned data in place.",
+    "Distinguish read-only borrows from mutable borrows in function signatures.",
+    "Apply mutation through a reference without taking ownership of the value."
   ],
   "prerequisite_unit_ids": [
     "unit.rust.borrowing.v1"
   ],
-  "explanation": "References point at existing data. Mutable references allow a function to change that data without taking ownership.",
+  "explanation": "This slice builds on immutable borrowing by introducing mutable references. A helper can change a caller-owned value through `&mut` while the caller still keeps ownership of the `String` itself.",
   "examples": [
     {
       "id": "example.mutable-reference",
-      "title": "Update through `&mut`",
+      "title": "Append text through `&mut String`",
       "code": "fn add_excitement(message: &mut String) {\n    message.push('!');\n}\n\nfn main() {\n    let mut message = String::from(\"Rust\");\n    add_excitement(&mut message);\n    println!(\"{message}\");\n}"
     },
     {
       "id": "example.mutable-vector",
-      "title": "Mutate a vector through a reference",
+      "title": "Mutate a collection through a borrowed reference",
       "code": "fn push_default(values: &mut Vec<i32>) {\n    values.push(0);\n}"
     }
   ],
@@ -28,7 +28,7 @@
   ],
   "exercise_id": "exercise.rust.references.append-rust.v1",
   "completion_criteria": [
-    "Exercise tests pass",
-    "Learner can update owned data by passing a mutable reference"
+    "Exercise tests pass while the original value is updated in place",
+    "Learner can explain why the function signature needs `&mut String` instead of `String`"
   ]
 }

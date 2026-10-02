@@ -1,25 +1,25 @@
 {
   "id": "unit.rust.borrowing.v1",
   "version": 1,
-  "title": "Rust Borrowing",
+  "title": "Ownership (Part 2) - Immutable borrowing",
   "learning_objectives": [
-    "Use immutable borrows to read owned values without moving them.",
-    "Choose borrowed parameters when a function does not need ownership.",
-    "Recognize borrow checker errors caused by conflicting access."
+    "Use immutable borrows to inspect owned values without taking ownership.",
+    "Return one of multiple borrowed inputs without allocating a new owned value.",
+    "Recognize borrow-checker feedback when access rules conflict."
   ],
   "prerequisite_unit_ids": [
     "unit.rust.ownership.v1"
   ],
-  "explanation": "Borrowing lets code inspect data through references while the owner keeps control of the value.",
+  "explanation": "This ownership slice zooms in on immutable borrowing as an API design choice. When a function only needs to compare or inspect text, borrowing inputs and returning a borrowed result keeps ownership with the caller and avoids unnecessary allocation.",
   "examples": [
     {
       "id": "example.borrow-read",
-      "title": "Borrow to inspect text",
+      "title": "Borrow a `String` to inspect it",
       "code": "fn greeting_length(message: &String) -> usize {\n    message.len()\n}\n\nfn main() {\n    let greeting = String::from(\"hello\");\n    println!(\"{}\", greeting_length(&greeting));\n    println!(\"{greeting}\");\n}"
     },
     {
       "id": "example.borrow-str",
-      "title": "Borrow as `&str`",
+      "title": "Prefer `&str` for read-only text helpers",
       "code": "fn starts_with_rust(topic: &str) -> bool {\n    topic.starts_with(\"Rust\")\n}"
     }
   ],
@@ -28,7 +28,7 @@
   ],
   "exercise_id": "exercise.rust.borrowing.longer-label.v1",
   "completion_criteria": [
-    "Exercise tests pass",
-    "Learner can explain why reading through a borrow preserves ownership"
+    "Exercise tests pass without cloning either input string",
+    "Learner can explain why the returned label can be borrowed from one of the inputs"
   ]
 }

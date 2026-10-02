@@ -1,25 +1,25 @@
 {
   "id": "unit.rust.functions.v1",
   "version": 1,
-  "title": "Rust Functions",
+  "title": "Functions (Part 1) - Parameters and return values",
   "learning_objectives": [
-    "Define and call functions with typed parameters.",
-    "Return values from function expressions.",
-    "Understand function signatures as contracts."
+    "Define functions with typed parameters.",
+    "Return values from the final expression in a function body.",
+    "Read a function signature as a contract between caller and implementation."
   ],
   "prerequisite_unit_ids": [
     "unit.rust.variables.v1"
   ],
-  "explanation": "Functions group reusable behavior. Rust requires explicit parameter and return types in signatures.",
+  "explanation": "This slice introduces the shape of a Rust function: a name, typed parameters, and an optional return type. The exercise stays focused on reading the signature and returning the expected value from an expression.",
   "examples": [
     {
       "id": "example.function-call",
-      "title": "Simple function call",
+      "title": "Call a function with typed parameters",
       "code": "fn add(left: i32, right: i32) -> i32 {\n    left + right\n}\n\nfn main() {\n    println!(\"{}\", add(2, 3));\n}"
     },
     {
       "id": "example.return-expression",
-      "title": "Expression return",
+      "title": "Return the final expression",
       "code": "fn squared(value: i32) -> i32 {\n    value * value\n}"
     }
   ],
@@ -28,7 +28,7 @@
   ],
   "exercise_id": "exercise.rust.functions.rectangle-area.v1",
   "completion_criteria": [
-    "Exercise tests pass",
-    "Learner can define a function with parameters and return type"
+    "Exercise tests pass for ordinary and zero-valued dimensions",
+    "Learner can explain how the parameter types and return type guide the implementation"
   ]
 }
