@@ -34,11 +34,11 @@ spec:
             - name: EXECUTOR_BASE_URL
               value: "http://executor.rust-learning.svc.cluster.local:8082"
             - name: JWT_ISSUER
-              value: "https://uaa.NEXTECHINCUBATOR.COM/realms/nextechincubator"
+              value: "https://uaa.nextechincubator.com/realms/nextechincubator"
             - name: JWT_AUDIENCE
               value: "rust-learning-web"
             - name: JWT_JWKS_URL
-              value: "https://uaa.NEXTECHINCUBATOR.COM/realms/nextechincubator/protocol/openid-connect/certs"
+              value: "https://uaa.nextechincubator.com/realms/nextechincubator/protocol/openid-connect/certs"
             - name: RUST_LOG
               value: "info"
           readinessProbe:
@@ -88,17 +88,17 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
     nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://rust.NEXTECHINCUBATOR.COM"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://rust.nextechincubator.com"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, PATCH, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - rust-api.NEXTECHINCUBATOR.COM
+        - rust-api.nextechincubator.com
       secretName: rust-api-tls-secret
   rules:
-    - host: rust-api.NEXTECHINCUBATOR.COM
+    - host: rust-api.nextechincubator.com
       http:
         paths:
           - path: /

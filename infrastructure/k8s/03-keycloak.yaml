@@ -23,11 +23,11 @@ data:
           "directAccessGrantsEnabled": true,
           "standardFlowEnabled": true,
           "redirectUris": [
-            "https://rust.NEXTECHINCUBATOR.COM/*",
+            "https://rust.nextechincubator.com/*",
             "http://localhost:5173/*"
           ],
           "webOrigins": [
-            "https://rust.NEXTECHINCUBATOR.COM",
+            "https://rust.nextechincubator.com",
             "http://localhost:5173",
             "+"
           ],
@@ -87,7 +87,7 @@ spec:
             - start
             - --http-enabled=true
             - --proxy-headers=xforwarded
-            - --hostname=https://uaa.NEXTECHINCUBATOR.COM
+            - --hostname=https://uaa.nextechincubator.com
             - --hostname-strict=false
             - --import-realm
           ports:
@@ -198,10 +198,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - uaa.NEXTECHINCUBATOR.COM
+        - uaa.nextechincubator.com
       secretName: uaa-tls-secret
   rules:
-    - host: uaa.NEXTECHINCUBATOR.COM
+    - host: uaa.nextechincubator.com
       http:
         paths:
           - path: /

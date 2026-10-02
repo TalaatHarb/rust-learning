@@ -23,13 +23,13 @@ spec:
               containerPort: 80
           env:
             - name: VITE_API_BASE_URL
-              value: "https://rust-api.NEXTECHINCUBATOR.COM"
+              value: "https://rust-api.nextechincubator.com"
             - name: VITE_OIDC_AUTHORITY
-              value: "https://uaa.NEXTECHINCUBATOR.COM/realms/nextechincubator"
+              value: "https://uaa.nextechincubator.com/realms/nextechincubator"
             - name: VITE_OIDC_CLIENT_ID
               value: "rust-learning-web"
             - name: VITE_OIDC_REDIRECT_URI
-              value: "https://rust.NEXTECHINCUBATOR.COM"
+              value: "https://rust.nextechincubator.com"
           readinessProbe:
             httpGet:
               path: /
@@ -79,10 +79,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - rust.NEXTECHINCUBATOR.COM
+        - rust.nextechincubator.com
       secretName: rust-web-tls-secret
   rules:
-    - host: rust.NEXTECHINCUBATOR.COM
+    - host: rust.nextechincubator.com
       http:
         paths:
           - path: /
