@@ -23,7 +23,11 @@ data:
           "directAccessGrantsEnabled": true,
           "standardFlowEnabled": true,
           "redirectUris": [
+            "https://rust.nextechincubator.com",
+            "https://rust.nextechincubator.com/",
             "https://rust.nextechincubator.com/*",
+            "http://localhost:5173",
+            "http://localhost:5173/",
             "http://localhost:5173/*"
           ],
           "webOrigins": [

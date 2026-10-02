@@ -23,7 +23,7 @@ Copy `.env.example` to `.env` to configure the development server or static buil
 - `VITE_API_BASE_URL` — API base URL (default `http://localhost:8080`).
 - `VITE_OIDC_AUTHORITY` — OIDC/Keycloak realm authority (default `http://localhost:8081/realms/nextechincubator`).
 - `VITE_OIDC_CLIENT_ID` — OIDC client ID (default `rust-learning-web`).
-- `VITE_OIDC_REDIRECT_URI` — login/logout redirect URI (defaults to the current page origin).
+- `VITE_OIDC_REDIRECT_URI` — login/logout redirect URI (defaults to the current page origin). Because the frontend sends the bare origin by default (for example `https://rust.nextechincubator.com`), register that exact URI in Keycloak in addition to any wildcard form such as `https://rust.nextechincubator.com/*`.
 
 The production bundle can also be deployed as static files from `dist/`. To build an Nginx image, run `docker build -f apps/web/Dockerfile -t rust-learning-web .` from the repository root. The image serves the same Vite build, includes `.env.example` as its runtime defaults, and generates `env-config.js` at container startup. Values provided to the container override the bundled defaults:
 
