@@ -8,6 +8,7 @@ import { LearningUnitPage } from './pages/LearningUnitPage'
 import { LoginPage } from './pages/LoginPage'
 import { ProgressPage } from './pages/ProgressPage'
 import { RoadmapPage } from './pages/RoadmapPage'
+import { ThemeSelector } from './components/ThemeSelector'
 
 const navItems = [
   { to: '/', label: 'Dashboard' },
@@ -38,9 +39,15 @@ function App() {
             className="menu-toggle"
             aria-expanded={isNavOpen}
             aria-controls="primary-navigation"
+            aria-label={isNavOpen ? 'Close navigation menu' : 'Open navigation menu'}
             onClick={() => setIsNavOpen((value) => !value)}
           >
-            {isNavOpen ? 'Close menu' : 'Menu'}
+            <span className={isNavOpen ? 'menu-toggle__icon menu-toggle__icon--open' : 'menu-toggle__icon'}>
+              <span className="menu-toggle__bar" />
+              <span className="menu-toggle__bar" />
+              <span className="menu-toggle__bar" />
+            </span>
+            <span className="menu-toggle__text">{isNavOpen ? 'Close menu' : 'Open menu'}</span>
           </button>
         </div>
       </header>
@@ -50,6 +57,7 @@ function App() {
           className={isNavOpen ? 'navigation navigation--open' : 'navigation'}
           aria-label="Primary"
         >
+          <ThemeSelector />
           {navigationItems.map((item) => (
             <NavLink
               key={item.to}

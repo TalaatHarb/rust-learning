@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import Editor from '@monaco-editor/react'
 import { useIsNarrowViewport } from '../lib/useIsNarrowViewport'
+import { useTheme } from '../lib/useTheme'
 
 type CodeBlockProps = {
   title: string
@@ -9,6 +10,7 @@ type CodeBlockProps = {
 
 export function CodeBlock({ title, children }: CodeBlockProps) {
   const isNarrowViewport = useIsNarrowViewport()
+  const { resolvedTheme } = useTheme()
   const lineNumbers: 'off' | 'on' = isNarrowViewport ? 'off' : 'on'
   const options = useMemo(
     () => ({
@@ -40,7 +42,7 @@ export function CodeBlock({ title, children }: CodeBlockProps) {
         <Editor
           defaultLanguage="rust"
           height={isNarrowViewport ? '180px' : '220px'}
-          theme="vs-dark"
+          theme={resolvedTheme === 'dark' ? 'vs-dark' : 'vs'}
           value={children}
           options={options}
         />

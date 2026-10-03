@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import Editor from '@monaco-editor/react'
 import { useIsNarrowViewport } from '../lib/useIsNarrowViewport'
+import { useTheme } from '../lib/useTheme'
 
 type CodeEditorProps = {
   code: string
@@ -10,6 +11,7 @@ type CodeEditorProps = {
 
 export function CodeEditor({ code, readOnly = false, onChange }: CodeEditorProps) {
   const isNarrowViewport = useIsNarrowViewport()
+  const { resolvedTheme } = useTheme()
   const lineNumbers: 'off' | 'on' = isNarrowViewport ? 'off' : 'on'
   const wordWrap: 'off' | 'on' = isNarrowViewport ? 'on' : 'off'
   const height = readOnly
@@ -49,7 +51,7 @@ export function CodeEditor({ code, readOnly = false, onChange }: CodeEditorProps
         <Editor
           defaultLanguage="rust"
           height={height}
-          theme="vs-dark"
+          theme={resolvedTheme === 'dark' ? 'vs-dark' : 'vs'}
           value={code}
           onChange={(value) => onChange?.(value ?? '')}
           options={options}
