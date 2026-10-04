@@ -4,7 +4,7 @@
   "title": "Generics and Traits (Part 1) - Reusable behavior",
   "learning_objectives": [
     "Write a generic function that works with multiple concrete types.",
-    "Define a trait to describe behavior shared by different types.",
+    "Define and implement a trait for multiple concrete types.",
     "Use a trait bound to require behavior from a generic parameter.",
     "Explain how generic code preserves compile-time type checking."
   ],
@@ -20,23 +20,23 @@
     },
     {
       "id": "example.trait",
-      "title": "Describe shared behavior with a trait",
-      "code": "trait Summary {\n    fn summary(&self) -> String;\n}\n\nstruct Article { title: String }\nimpl Summary for Article {\n    fn summary(&self) -> String { self.title.clone() }\n}"
+      "title": "Define and implement a trait",
+      "code": "trait Ranked {\n    fn rank(&self) -> i64;\n}\n\nimpl Ranked for i32 {\n    fn rank(&self) -> i64 { i64::from(*self) }\n}\n\nimpl Ranked for u32 {\n    fn rank(&self) -> i64 { i64::from(*self) }\n}"
     },
     {
       "id": "example.trait-bound",
       "title": "Require an ordering operation",
-      "code": "fn largest<T: PartialOrd + Copy>(values: &[T]) -> Option<T> {\n    values.iter().copied().reduce(|left, right| if left > right { left } else { right })\n}"
+      "code": "fn largest<T: Ranked + Copy>(values: &[T]) -> Option<T> {\n    let mut largest = *values.first()?;\n    for value in values.iter().copied().skip(1) {\n        if value.rank() > largest.rank() { largest = value; }\n    }\n    Some(largest)\n}"
     }
   ],
   "compiler_error_examples": [
-    "error[E0369]: binary operation `>` cannot be applied to type `T`",
+    "error[E0277]: the trait bound `T: Ranked` is not satisfied",
     "error[E0277]: the trait bound `T: Copy` is not satisfied"
   ],
-  "exercise_id": "exercise.rust.generics-traits.reusable-summary.v1",
+  "exercise_id": "exercise.rust.generics-traits.generic-largest.v1",
   "completion_criteria": [
     "Exercise finds the largest value for at least two concrete numeric types",
-    "Learner can identify the generic parameter and explain each trait bound",
+    "Learner can identify the custom trait implementation, generic parameter, and trait bound",
     "Exercise returns `None` for an empty input rather than assuming a value exists"
   ]
 }

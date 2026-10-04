@@ -997,6 +997,17 @@ mod tests {
         code: String,
     }
 
+    fn mock_pass_if_contains(code: &str, marker: &str) -> (&'static str, String) {
+        (
+            if code.contains(marker) {
+                "PASSED"
+            } else {
+                "FAILED"
+            },
+            String::new(),
+        )
+    }
+
     fn test_token(secret: &str, subject: &str, roles: &[&str]) -> String {
         encode(
             &Header::default(),
@@ -1074,38 +1085,18 @@ mod tests {
                 },
                 String::new(),
             ),
-            "exercise.rust.collections.record-index.v1" => (
-                if payload.code.contains("total_for") {
-                    "PASSED"
-                } else {
-                    "FAILED"
-                },
-                String::new(),
-            ),
-            "exercise.rust.error-handling.parse-record.v1" => (
-                if payload.code.contains("parse_count") {
-                    "PASSED"
-                } else {
-                    "FAILED"
-                },
-                String::new(),
-            ),
-            "exercise.rust.generics-traits.reusable-summary.v1" => (
-                if payload.code.contains("fn largest") {
-                    "PASSED"
-                } else {
-                    "FAILED"
-                },
-                String::new(),
-            ),
-            "exercise.rust.closures-iterators.filter-transform.v1" => (
-                if payload.code.contains("even_squares") {
-                    "PASSED"
-                } else {
-                    "FAILED"
-                },
-                String::new(),
-            ),
+            "exercise.rust.collections.record-index.v1" => {
+                mock_pass_if_contains(&payload.code, "total_for")
+            }
+            "exercise.rust.error-handling.parse-record.v1" => {
+                mock_pass_if_contains(&payload.code, "parse_count")
+            }
+            "exercise.rust.generics-traits.generic-largest.v1" => {
+                mock_pass_if_contains(&payload.code, "fn largest")
+            }
+            "exercise.rust.closures-iterators.filter-transform.v1" => {
+                mock_pass_if_contains(&payload.code, "even_squares")
+            }
             _ => ("ERROR", "unsupported exercise".to_string()),
         };
 
@@ -1480,9 +1471,9 @@ mod tests {
                 "pub fn parse_count(_: Option<&str>) -> Result<u32, String> { Ok(0) }",
             ),
             (
-                "exercise.rust.generics-traits.reusable-summary.v1",
+                "exercise.rust.generics-traits.generic-largest.v1",
                 "generics-traits",
-                "pub fn largest<T: PartialOrd + Copy>(_: &[T]) -> Option<T> { None }",
+                "pub fn largest<T: Ranked + Copy>(_: &[T]) -> Option<T> { None }",
             ),
             (
                 "exercise.rust.closures-iterators.filter-transform.v1",

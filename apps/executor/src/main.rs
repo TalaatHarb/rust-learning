@@ -302,7 +302,7 @@ fn map_template_path(exercise_id: &str) -> anyhow::Result<&'static Path> {
         "exercise.rust.error-handling.parse-record.v1" => {
             Ok(Path::new("content/exercises/error-handling/v1/template"))
         }
-        "exercise.rust.generics-traits.reusable-summary.v1" => {
+        "exercise.rust.generics-traits.generic-largest.v1" => {
             Ok(Path::new("content/exercises/generics-traits/v1/template"))
         }
         "exercise.rust.closures-iterators.filter-transform.v1" => Ok(Path::new(

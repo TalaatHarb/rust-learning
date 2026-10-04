@@ -164,7 +164,7 @@ The exercise should parse a small record from input that may be absent or invali
 
 - **Slug:** `generics-traits`
 - **Prerequisite:** `unit.rust.error-handling.v1`
-- **Content IDs:** `unit.rust.generics-traits.v1`; `exercise.rust.generics-traits.reusable-summary.v1`
+- **Content IDs:** `unit.rust.generics-traits.v1`; `exercise.rust.generics-traits.generic-largest.v1`
 
 ### Learning outcomes
 
@@ -177,7 +177,7 @@ The exercise should parse a small record from input that may be absent or invali
 
 Introduce a generic function and a simple generic type, then define a trait, implement it for multiple types, and use a trait bound in a reusable function. Keep lifetimes, associated types, blanket implementations, and advanced trait features out of scope.
 
-The exercise should implement reusable behavior over multiple types using a generic type or function and a small trait bound. Tests should verify the same operation for at least two distinct types and include a simple boundary case.
+The exercise should define a small trait, implement it for multiple numeric types, and use its bound in a generic function. Tests should verify the same operation for at least two distinct types and include a simple boundary case.
 
 ### Completion checks
 
