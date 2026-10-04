@@ -997,6 +997,17 @@ mod tests {
         code: String,
     }
 
+    fn mock_pass_if_contains(code: &str, marker: &str) -> (&'static str, String) {
+        (
+            if code.contains(marker) {
+                "PASSED"
+            } else {
+                "FAILED"
+            },
+            String::new(),
+        )
+    }
+
     fn test_token(secret: &str, subject: &str, roles: &[&str]) -> String {
         encode(
             &Header::default(),
@@ -1074,6 +1085,18 @@ mod tests {
                 },
                 String::new(),
             ),
+            "exercise.rust.collections.record-index.v1" => {
+                mock_pass_if_contains(&payload.code, "total_for")
+            }
+            "exercise.rust.error-handling.parse-record.v1" => {
+                mock_pass_if_contains(&payload.code, "parse_count")
+            }
+            "exercise.rust.generics-traits.generic-largest.v1" => {
+                mock_pass_if_contains(&payload.code, "largest")
+            }
+            "exercise.rust.closures-iterators.filter-transform.v1" => {
+                mock_pass_if_contains(&payload.code, "even_squares")
+            }
             _ => ("ERROR", "unsupported exercise".to_string()),
         };
 
@@ -1303,7 +1326,11 @@ mod tests {
                 "types",
                 "pattern-matching",
                 "modules",
-                "structs"
+                "structs",
+                "collections",
+                "error-handling",
+                "generics-traits",
+                "closures-iterators"
             ]
         );
     }
@@ -1433,6 +1460,26 @@ mod tests {
                 "structs",
                 "pub struct Profile { pub name: String } pub fn summary(_: &Profile) -> String { String::new() }",
             ),
+            (
+                "exercise.rust.collections.record-index.v1",
+                "collections",
+                "pub fn total_for(_: &[(String, u32)], _: &str) -> Option<u32> { None }",
+            ),
+            (
+                "exercise.rust.error-handling.parse-record.v1",
+                "error-handling",
+                "pub fn parse_count(_: Option<&str>) -> Result<u32, String> { Ok(0) }",
+            ),
+            (
+                "exercise.rust.generics-traits.generic-largest.v1",
+                "generics-traits",
+                "pub fn largest<T: Ranked + Copy>(_: &[T]) -> Option<T> { None }",
+            ),
+            (
+                "exercise.rust.closures-iterators.filter-transform.v1",
+                "closures-iterators",
+                "pub fn even_squares(_: &[i32]) -> Vec<i32> { Vec::new() }",
+            ),
         ];
 
         for (exercise_id, unit_slug, code) in submissions {
@@ -1549,7 +1596,7 @@ mod tests {
         let progress: ProgressOverviewResponse = response_json(progress_response).await;
 
         assert_eq!(progress.resume_unit_slug, "functions");
-        assert_eq!(progress.units.len(), 11);
+        assert_eq!(progress.units.len(), 15);
         assert_eq!(
             progress
                 .units

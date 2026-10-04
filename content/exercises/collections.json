@@ -1,0 +1,13 @@
+{
+  "id": "exercise.rust.collections.record-index.v1",
+  "version": 1,
+  "title": "Index a collection of records",
+  "starter_file": "src/lib.rs",
+  "template_path": "content/exercises/collections/v1/template",
+  "expected_solution_file": "src/lib.solution.rs",
+  "hints": [
+    "Create a `HashMap` whose keys borrow the record names and whose values hold accumulated totals.",
+    "Use `entry` and `or_insert` to accumulate each score.",
+    "Use `get` and `copied` to return `None` when the requested name is absent."
+  ]
+}

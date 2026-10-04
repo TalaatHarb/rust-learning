@@ -1,0 +1,42 @@
+{
+  "id": "unit.rust.collections.v1",
+  "version": 1,
+  "title": "Collections (Part 1) - Strings, vectors, and maps",
+  "learning_objectives": [
+    "Distinguish owned `String` values from borrowed string slices.",
+    "Create, update, access, and iterate over a `Vec`.",
+    "Store and retrieve keyed values with a `HashMap`.",
+    "Choose a collection that matches a small data-management task."
+  ],
+  "prerequisite_unit_ids": [
+    "unit.rust.structs.v1"
+  ],
+  "explanation": "Growable collections keep related values together. A `String` owns UTF-8 text, a `Vec<T>` owns an ordered sequence of values, and a `HashMap<K, V>` associates keys with values. Collection operations often transfer ownership, so choosing whether to borrow or move a value is part of using these types.",
+  "examples": [
+    {
+      "id": "example.string-owned-text",
+      "title": "Own growable text",
+      "code": "let mut title = String::from(\"Rust\");\ntitle.push_str(\" Book\");\nlet borrowed: &str = &title;"
+    },
+    {
+      "id": "example.vector-values",
+      "title": "Append and read values in a vector",
+      "code": "let mut scores = vec![10, 20];\nscores.push(30);\nlet first = scores.get(0);\nlet total: i32 = scores.iter().sum();"
+    },
+    {
+      "id": "example.hash-map",
+      "title": "Index values by a key",
+      "code": "use std::collections::HashMap;\n\nlet mut scores = HashMap::new();\nscores.insert(String::from(\"Ada\"), 42);\nlet ada_score = scores.get(\"Ada\").copied();"
+    }
+  ],
+  "compiler_error_examples": [
+    "error[E0382]: borrow of moved value: `name`",
+    "error[E0502]: cannot borrow `scores` as mutable because it is also borrowed as immutable"
+  ],
+  "exercise_id": "exercise.rust.collections.record-index.v1",
+  "completion_criteria": [
+    "Exercise tests cover multiple records, repeated keys, and a missing key",
+    "Learner can explain the distinct roles of `String`, `Vec`, and `HashMap`",
+    "Learner can describe why lookup returns an optional value"
+  ]
+}

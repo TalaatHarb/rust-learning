@@ -1,0 +1,13 @@
+{
+  "id": "exercise.rust.closures-iterators.filter-transform.v1",
+  "version": 1,
+  "title": "Filter and transform values",
+  "starter_file": "src/lib.rs",
+  "template_path": "content/exercises/closures-iterators/v1/template",
+  "expected_solution_file": "src/lib.solution.rs",
+  "hints": [
+    "Begin with `values.iter()` so the input remains borrowed.",
+    "Use `filter` to keep even values, then `map` to square each matching value.",
+    "Use `collect` to consume the iterator and build the result vector."
+  ]
+}

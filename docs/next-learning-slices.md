@@ -1,6 +1,6 @@
 # Next Learning Slices
 
-This plan records the Rust Foundations sequence through **Structs** and plans the next units after it. Each slice should be delivered end to end: curriculum content, runnable exercise, roadmap integration, executor support, and learner-flow verification.
+This plan records the Rust Foundations sequence through **Closures and Iterators** and the next units after it. Each slice should be delivered end to end: curriculum content, runnable exercise, roadmap integration, executor support, and learner-flow verification.
 
 ## Shared implementation requirements
 
@@ -110,7 +110,7 @@ The exercise should build a small profile struct, expose a method that derives o
 - The exercise demonstrates methods and a meaningful public/private field boundary.
 - The expected solution passes its tests, including the boundary case, and the starter provides a clear compiling scaffold.
 
-## 5. Collections
+## 5. Collections (Implemented)
 
 - **Slug:** `collections`
 - **Prerequisite:** `unit.rust.structs.v1`
@@ -135,7 +135,7 @@ The exercise should build and query a small collection of records, using `Vec` t
 - The exercise builds and queries more than one record and tests a missing or empty case.
 - The starter compiles, and the expected solution passes the exercise tests.
 
-## 6. Error Handling
+## 6. Error Handling (Implemented)
 
 - **Slug:** `error-handling`
 - **Prerequisite:** `unit.rust.collections.v1`
@@ -160,11 +160,11 @@ The exercise should parse a small record from input that may be absent or invali
 - The exercise handles missing and invalid input as explicit outcomes and demonstrates `?`.
 - The starter compiles, and the expected solution passes all success and failure cases.
 
-## 7. Generics and Traits
+## 7. Generics and Traits (Implemented)
 
 - **Slug:** `generics-traits`
 - **Prerequisite:** `unit.rust.error-handling.v1`
-- **Content IDs:** `unit.rust.generics-traits.v1`; `exercise.rust.generics-traits.reusable-summary.v1`
+- **Content IDs:** `unit.rust.generics-traits.v1`; `exercise.rust.generics-traits.generic-largest.v1`
 
 ### Learning outcomes
 
@@ -177,7 +177,7 @@ The exercise should parse a small record from input that may be absent or invali
 
 Introduce a generic function and a simple generic type, then define a trait, implement it for multiple types, and use a trait bound in a reusable function. Keep lifetimes, associated types, blanket implementations, and advanced trait features out of scope.
 
-The exercise should implement reusable behavior over multiple types using a generic type or function and a small trait bound. Tests should verify the same operation for at least two distinct types and include a simple boundary case.
+The exercise should define a small trait, implement it for multiple numeric types, and use its bound in a generic function. Tests should verify the same operation for at least two distinct types and include a simple boundary case.
 
 ### Completion checks
 
@@ -185,7 +185,7 @@ The exercise should implement reusable behavior over multiple types using a gene
 - The exercise demonstrates one shared operation with at least two type implementations.
 - The starter compiles, and the expected solution passes all type-specific tests.
 
-## 8. Closures and Iterators
+## 8. Closures and Iterators (Implemented)
 
 - **Slug:** `closures-iterators`
 - **Prerequisite:** `unit.rust.generics-traits.v1`
@@ -213,3 +213,10 @@ The exercise should filter a collection of records or values and transform the m
 ## Integration and release of the sequence
 
 For each unit, verify that it appears after its prerequisite in the Foundations roadmap, loads through the existing unit/exercise flow, and can be submitted and reflected in learner progress. Add the exercise ID to the executor template mapping and cover submission/progress behavior with the existing API integration-test patterns. Check the full roadmap ordering and prerequisite graph, then run `npm run content:validate` and `npm run validate`; complete the MVP smoke-flow checks when the test database is available.
+
+## Next Rust Book topics
+
+- Lifetimes and borrowing annotations.
+- Automated testing with unit, integration, and documentation tests.
+- Smart pointers, including `Box`, `Rc`, and `RefCell`.
+- Concurrency with threads, message passing, and shared state.

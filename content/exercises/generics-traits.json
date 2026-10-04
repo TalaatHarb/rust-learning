@@ -1,0 +1,13 @@
+{
+  "id": "exercise.rust.generics-traits.generic-largest.v1",
+  "version": 1,
+  "title": "Find a largest value generically",
+  "starter_file": "src/lib.rs",
+  "template_path": "content/exercises/generics-traits/v1/template",
+  "expected_solution_file": "src/lib.solution.rs",
+  "hints": [
+    "Implement `Ranked` for both `i32` and `u32` before writing the generic function.",
+    "Compare values through `rank()` and require `Ranked + Copy` on the type parameter.",
+    "Return `None` when the slice is empty."
+  ]
+}
