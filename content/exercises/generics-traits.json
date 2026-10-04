@@ -6,7 +6,6 @@
   "template_path": "content/exercises/generics-traits/v1/template",
   "expected_solution_file": "src/lib.solution.rs",
   "hints": [
-    "Return `None` before indexing when the slice is empty.",
     "Implement `Ranked` for both `i32` and `u32` before writing the generic function.",
     "Compare values through `rank()` and require `Ranked + Copy` on the type parameter.",
     "Return `None` when the slice is empty."

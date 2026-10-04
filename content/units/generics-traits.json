@@ -25,7 +25,7 @@
     },
     {
       "id": "example.trait-bound",
-      "title": "Require an ordering operation",
+      "title": "Require a custom trait bound",
       "code": "fn largest<T: Ranked + Copy>(values: &[T]) -> Option<T> {\n    let mut largest = *values.first()?;\n    for value in values.iter().copied().skip(1) {\n        if value.rank() > largest.rank() { largest = value; }\n    }\n    Some(largest)\n}"
     }
   ],

@@ -1092,7 +1092,7 @@ mod tests {
                 mock_pass_if_contains(&payload.code, "parse_count")
             }
             "exercise.rust.generics-traits.generic-largest.v1" => {
-                mock_pass_if_contains(&payload.code, "fn largest")
+                mock_pass_if_contains(&payload.code, "largest")
             }
             "exercise.rust.closures-iterators.filter-transform.v1" => {
                 mock_pass_if_contains(&payload.code, "even_squares")
