@@ -1,0 +1,42 @@
+{
+  "id": "unit.rust.closures-iterators.v1",
+  "version": 1,
+  "title": "Closures and Iterators (Part 1) - Filter and transform",
+  "learning_objectives": [
+    "Recognize closure syntax and use a closure where a function-like value is expected.",
+    "Create an iterator from a collection and apply common transformations.",
+    "Filter and transform values, then collect or aggregate the result.",
+    "Explain that iterator adapters are lazy until a consuming operation runs."
+  ],
+  "prerequisite_unit_ids": [
+    "unit.rust.generics-traits.v1"
+  ],
+  "explanation": "Closures are anonymous functions that can capture values from their environment. Iterators provide a composable way to process sequences: adapters such as `filter` and `map` describe work, and a consumer such as `collect` or `sum` performs it. This separation makes data-processing code concise without hiding its order of operations.",
+  "examples": [
+    {
+      "id": "example.closure",
+      "title": "Pass a closure to an operation",
+      "code": "let threshold = 5;\nlet is_large = |value: &i32| *value > threshold;\nassert!(is_large(&8));"
+    },
+    {
+      "id": "example.iterator-adapters",
+      "title": "Filter, transform, and collect",
+      "code": "let values = [1, 2, 3, 4, 5];\nlet squares: Vec<i32> = values.iter()\n    .filter(|value| **value % 2 == 0)\n    .map(|value| value * value)\n    .collect();"
+    },
+    {
+      "id": "example.iterator-laziness",
+      "title": "Consume an iterator to perform its work",
+      "code": "let doubled: i32 = [1, 2, 3].iter().map(|value| value * 2).sum();"
+    }
+  ],
+  "compiler_error_examples": [
+    "error[E0308]: mismatched types; expected a reference, found an integer",
+    "error[E0283]: type annotations needed for `collect`"
+  ],
+  "exercise_id": "exercise.rust.closures-iterators.filter-transform.v1",
+  "completion_criteria": [
+    "Exercise filters even values and squares them while preserving order",
+    "Learner can identify the filter, transformation, and consuming operations",
+    "Exercise handles both non-empty and empty input"
+  ]
+}

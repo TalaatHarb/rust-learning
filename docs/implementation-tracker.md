@@ -26,7 +26,8 @@
 - [x] Documented the test database configuration and ran the full MVP smoke flow and validation.
 - [x] Implemented the Types, Pattern Matching, and Modules learning slices with exercises, roadmap ordering, executor mappings, and API progress coverage.
 - [x] Implemented the Structs curriculum slice with its exercise, roadmap ordering, executor mapping, and learner-flow coverage.
+- [x] Implemented the Collections, Error Handling, Generics and Traits, and Closures and Iterators curriculum slices with exercises, roadmap ordering, executor mappings, and learner-flow coverage.
 
 ## Next planned tasks
 
-- Implement the Collections curriculum slice with its exercise, roadmap ordering, executor mapping, and learner-flow coverage.
+- Continue the Rust Book sequence with Lifetimes, Testing, Smart Pointers, and Concurrency slices.

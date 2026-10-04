@@ -1,0 +1,13 @@
+{
+  "id": "exercise.rust.generics-traits.reusable-summary.v1",
+  "version": 1,
+  "title": "Find a largest value generically",
+  "starter_file": "src/lib.rs",
+  "template_path": "content/exercises/generics-traits/v1/template",
+  "expected_solution_file": "src/lib.solution.rs",
+  "hints": [
+    "Return `None` before indexing when the slice is empty.",
+    "Keep the current largest value and compare each item against it.",
+    "The `PartialOrd` and `Copy` bounds provide comparison and inexpensive value copying."
+  ]
+}

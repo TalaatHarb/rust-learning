@@ -1,0 +1,42 @@
+{
+  "id": "unit.rust.error-handling.v1",
+  "version": 1,
+  "title": "Error Handling (Part 1) - Option, Result, and propagation",
+  "learning_objectives": [
+    "Represent a value that may be absent with `Option`.",
+    "Represent an operation that may fail with `Result`.",
+    "Handle outcomes with `match` and propagate compatible errors with `?`.",
+    "Distinguish recoverable errors from situations where a panic is appropriate."
+  ],
+  "prerequisite_unit_ids": [
+    "unit.rust.collections.v1"
+  ],
+  "explanation": "Rust makes ordinary failure explicit in a function's return type. `Option<T>` represents either a value or its absence, while `Result<T, E>` represents success or an error that can carry information. Matching handles either outcome directly, and `?` returns an error to the caller when an operation fails.",
+  "examples": [
+    {
+      "id": "example.option-match",
+      "title": "Handle an optional lookup",
+      "code": "fn first_name(names: &[String]) -> Option<&str> {\n    match names.first() {\n        Some(name) => Some(name.as_str()),\n        None => None,\n    }\n}"
+    },
+    {
+      "id": "example.result-match",
+      "title": "Handle a fallible conversion",
+      "code": "fn parse_count(input: &str) -> Result<u32, std::num::ParseIntError> {\n    input.parse::<u32>()\n}"
+    },
+    {
+      "id": "example.propagate",
+      "title": "Use `?` to propagate an error",
+      "code": "fn parse_positive(input: &str) -> Result<u32, String> {\n    let value = input.parse::<u32>().map_err(|error| error.to_string())?;\n    if value == 0 { return Err(String::from(\"count must be positive\")); }\n    Ok(value)\n}"
+    }
+  ],
+  "compiler_error_examples": [
+    "error[E0308]: mismatched types; expected `Result<_, _>`, found `u32`",
+    "error[E0277]: the `?` operator can only be used in a function that returns `Result` or `Option`"
+  ],
+  "exercise_id": "exercise.rust.error-handling.parse-record.v1",
+  "completion_criteria": [
+    "Exercise tests cover valid input, missing input, and malformed input",
+    "Learner can explain why missing and invalid input are distinct outcomes",
+    "Exercise propagates parsing errors without panicking"
+  ]
+}

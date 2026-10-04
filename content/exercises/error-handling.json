@@ -1,0 +1,13 @@
+{
+  "id": "exercise.rust.error-handling.parse-record.v1",
+  "version": 1,
+  "title": "Parse an optional record value",
+  "starter_file": "src/lib.rs",
+  "template_path": "content/exercises/error-handling/v1/template",
+  "expected_solution_file": "src/lib.solution.rs",
+  "hints": [
+    "Use `ok_or_else` to turn absent input into a useful error.",
+    "Parse the text as `u32` and convert the parse error into a string.",
+    "Use `?` so malformed input returns an error instead of panicking."
+  ]
+}

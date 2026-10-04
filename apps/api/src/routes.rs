@@ -1074,6 +1074,38 @@ mod tests {
                 },
                 String::new(),
             ),
+            "exercise.rust.collections.record-index.v1" => (
+                if payload.code.contains("total_for") {
+                    "PASSED"
+                } else {
+                    "FAILED"
+                },
+                String::new(),
+            ),
+            "exercise.rust.error-handling.parse-record.v1" => (
+                if payload.code.contains("parse_count") {
+                    "PASSED"
+                } else {
+                    "FAILED"
+                },
+                String::new(),
+            ),
+            "exercise.rust.generics-traits.reusable-summary.v1" => (
+                if payload.code.contains("fn largest") {
+                    "PASSED"
+                } else {
+                    "FAILED"
+                },
+                String::new(),
+            ),
+            "exercise.rust.closures-iterators.filter-transform.v1" => (
+                if payload.code.contains("even_squares") {
+                    "PASSED"
+                } else {
+                    "FAILED"
+                },
+                String::new(),
+            ),
             _ => ("ERROR", "unsupported exercise".to_string()),
         };
 
@@ -1303,7 +1335,11 @@ mod tests {
                 "types",
                 "pattern-matching",
                 "modules",
-                "structs"
+                "structs",
+                "collections",
+                "error-handling",
+                "generics-traits",
+                "closures-iterators"
             ]
         );
     }
@@ -1432,6 +1468,26 @@ mod tests {
                 "exercise.rust.structs.build-profile.v1",
                 "structs",
                 "pub struct Profile { pub name: String } pub fn summary(_: &Profile) -> String { String::new() }",
+            ),
+            (
+                "exercise.rust.collections.record-index.v1",
+                "collections",
+                "pub fn total_for(_: &[(String, u32)], _: &str) -> Option<u32> { None }",
+            ),
+            (
+                "exercise.rust.error-handling.parse-record.v1",
+                "error-handling",
+                "pub fn parse_count(_: Option<&str>) -> Result<u32, String> { Ok(0) }",
+            ),
+            (
+                "exercise.rust.generics-traits.reusable-summary.v1",
+                "generics-traits",
+                "pub fn largest<T: PartialOrd + Copy>(_: &[T]) -> Option<T> { None }",
+            ),
+            (
+                "exercise.rust.closures-iterators.filter-transform.v1",
+                "closures-iterators",
+                "pub fn even_squares(_: &[i32]) -> Vec<i32> { Vec::new() }",
             ),
         ];
 

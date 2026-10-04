@@ -296,6 +296,18 @@ fn map_template_path(exercise_id: &str) -> anyhow::Result<&'static Path> {
         "exercise.rust.structs.build-profile.v1" => {
             Ok(Path::new("content/exercises/structs/v1/template"))
         }
+        "exercise.rust.collections.record-index.v1" => {
+            Ok(Path::new("content/exercises/collections/v1/template"))
+        }
+        "exercise.rust.error-handling.parse-record.v1" => {
+            Ok(Path::new("content/exercises/error-handling/v1/template"))
+        }
+        "exercise.rust.generics-traits.reusable-summary.v1" => {
+            Ok(Path::new("content/exercises/generics-traits/v1/template"))
+        }
+        "exercise.rust.closures-iterators.filter-transform.v1" => {
+            Ok(Path::new("content/exercises/closures-iterators/v1/template"))
+        }
         _ => {
             debug!(exercise_id = %exercise_id, "unsupported exercise template requested");
             anyhow::bail!("unsupported exercise_id: {exercise_id}")
